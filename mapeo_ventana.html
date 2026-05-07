@@ -260,25 +260,24 @@ function limitarDecimal(input, enteros, decimales){
       <table id="data-table">
         <thead>
           <tr>
-            <th style="position:sticky;left:0;background:#0c1525;z-index:9;">ID Fam</th>
-            <th>Dist_Estruct<br/>(m)</th><th>Dip_Estruct</th><th>DipDir_Estruct</th>
-            <th>Tipo_Estruct.</th><th>N°<br/>Estruct</th><th>Abertura(mm)</th>
-            <th>Espesor(mm)</th><th>Continuidad(m)</th><th>Espacionamiento<br/>(m)</th>
-            <th>N°<br/>Extremos visibles.</th><th>Terminacion</th>
-            <th>T. Relleno 1</th><th>T. Relleno 2</th>
-            <th style="color:var(--or);">V. R1</th><th style="color:var(--or);">V. R2</th>
-            <th style="color:var(--pk);">V. R1</th><th style="color:var(--pk);">V. R2</th>
-            <th>JRC</th><th>Rugosidad<br/>Estruct.</th><th>Forma<br/>Estruct.</th><th>Alteracion<br/>Estruct.</th>
+            <th rowspan="2" style="position:sticky;left:0;background:#0c1525;z-index:9;">ID Fam</th>
+            <th rowspan="2">Dist_Estruct<br/>(m)</th><th rowspan="2">Dip_Estruct</th><th rowspan="2">DipDir_Estruct</th>
+            <th rowspan="2">Tipo_Estruct.</th><th rowspan="2">N°<br/>Estruct</th><th rowspan="2">Abertura(mm)</th>
+            <th rowspan="2">Espesor(mm)</th><th rowspan="2">Continuidad(m)</th><th rowspan="2">Espacionamiento<br/>(m)</th>
+            <th rowspan="2">N°<br/>Extremos visibles.</th><th rowspan="2">Terminacion</th>
+            <th rowspan="2">T. Relleno 1</th><th rowspan="2">T. Relleno 2</th>
+            <th class="th89" colspan="2">(RMR'89)</th>
+            <th class="th76" colspan="2">(RMR'76)</th>
+            <th rowspan="2">JRC</th><th rowspan="2">Rugosidad<br/>Estruct.</th><th rowspan="2">Forma<br/>Estruct.</th><th rowspan="2">Alteracion<br/>Estruct.</th>
             <th class="th89" colspan="6">Condición Discontinuidades (RMR'89)</th>
             <th class="th76" colspan="6">Condición Discontinuidades (RMR'76)</th>
-            <th></th>
+            <th rowspan="2"></th>
           </tr>
           <tr id="subhdr" style="background:#090f1c;font-size:10px;">
-            <th style="position:sticky;left:0;background:#090f1c;z-index:9;"></th>
-            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+            <th class="th89">V. R1</th><th class="th89">V. R2</th>
+            <th class="th76">V. R1</th><th class="th76">V. R2</th>
             <th class="th89">Alt</th><th class="th89">Rel</th><th class="th89">Cont</th><th class="th89">Aber</th><th class="th89">Rug</th><th class="th89">Val</th>
             <th class="th76">Alt</th><th class="th76">Rel</th><th class="th76">Cont</th><th class="th76">Aber</th><th class="th76">Rug</th><th class="th76">Val</th>
-            <th></th>
           </tr>
         </thead>
         <tbody id="tbl-body"></tbody>
@@ -367,7 +366,7 @@ const ALTERACION=[
   {code:"a", label:"a — Alt. meteorizada",   r89:3,r76:3},
   {code:"c", label:"c — Comp. meteorizada",  r89:2,r76:2},
   {code:"s", label:"s — Suelo residual",     r89:1,r76:1},
-  {code:"-1",label:"-1 — Sin información",   r89:0,r76:0},
+  // {code:"-1",label:"-1 — Sin información",   r89:0,r76:0},
 ];
 const TIPO_EST=[
   {code:"JN",desc:"Junta"},{code:"BED",desc:"Estrato"},{code:"F",desc:"Falla"},
@@ -431,17 +430,18 @@ const CLASIFICACION_LITOLOGICA = [
 // ═══════════════════════════════════════════════════════
 // CÁLCULOS
 // ═══════════════════════════════════════════════════════
-function getRelleno(code,esp){
+function getRelleno(code,espesor){
   const r=RELLENO.find(x=>x.code===code);
   if(!r)return[null,null];
   if(r.tipo===3)return[r.sin89,r.sin76];
+  const esp=parseDecimalInput(espesor);
+  if(isNaN(esp))return[null,null];
+  const esMenorA5=esp<5;
   if(r.tipo===1){
-    if(esp==="1")return[r.dlt5_89,r.dlt5_76];
-    if(esp==="2")return[r.dgt5_89,r.dgt5_76];
+    return esMenorA5?[r.dlt5_89,r.dlt5_76]:[r.dgt5_89,r.dgt5_76];
   }
   if(r.tipo===2){
-    if(esp==="1")return[r.blt5_89,r.blt5_76];
-    if(esp==="2")return[r.bgt5_89,r.bgt5_76];
+    return esMenorA5?[r.blt5_89,r.blt5_76]:[r.bgt5_89,r.bgt5_76];
   }
   return[null,null];
 }
@@ -457,6 +457,14 @@ function parseDecimalInput(val){
   const n=Number(String(val).replace(",","."));
   return Number.isFinite(n)?n:NaN;
 }
+function clampDecimalInput(val,min,max){
+  const limpio=cleanDecimalInput(val);
+  if(limpio==="")return "";
+  const n=parseDecimalInput(limpio);
+  if(isNaN(n))return "";
+  const bounded=Math.min(max,Math.max(min,n));
+  return bounded.toFixed(2).replace(".",",");
+}
 function updateDecimalInput(el,id,key){
   const limpio=cleanDecimalInput(el.value);
   el.value=limpio;
@@ -468,6 +476,18 @@ function updateDecimalInput(el,id,key){
 }
 function commitDecimalInput(id,key,val){
   updRow(id,key,cleanDecimalInput(val));
+}
+function updateBoundedDecimalInput(el,id,key,min,max){
+  const limpio=cleanDecimalInput(el.value);
+  el.value=limpio;
+  const r=rows.find(x=>x.id===id);
+  if(r){
+    r[key]=limpio;
+    saveRows();
+  }
+}
+function commitBoundedDecimalInput(id,key,val,min,max){
+  updRow(id,key,clampDecimalInput(val,min,max));
 }
 function cleanIntegerInput(val,min,max){
   const soloDigitos=String(val??"").replace(/\D/g,"");
@@ -490,13 +510,24 @@ function commitIntegerInput(id,key,val,min,max){
 function setExtreSelectMode(el,expanded){
   if(!el)return;
   [...el.options].forEach(opt=>{
-    if(opt.value===""){
-      opt.textContent="—";
-      return;
-    }
     const item=EST_EXTRE.find(x=>x.code===opt.value);
     if(item)opt.textContent=expanded?`${item.code}. ${item.desc}`:item.code;
   });
+}
+function firstOptValue(opts){
+  if(!opts||!opts.length)return "";
+  const first=opts[0];
+  return typeof first==="string"?first:first.code;
+}
+function ensureSelectDefaults(row){
+  if(!row.tipo)row.tipo=firstOptValue(TIPO_EST);
+  if(!row.next)row.next=firstOptValue(EST_EXTRE);
+  if(!row.r1)row.r1=firstOptValue(RELLENO);
+  if(!row.r2)row.r2=firstOptValue(RELLENO);
+  if(!row.rug)row.rug=Object.keys(RUGOSIDAD)[0]||"";
+  if(!row.forma)row.forma=firstOptValue(FORMA_EST);
+  if(!row.alt)row.alt=firstOptValue(ALTERACION);
+  return row;
 }
 function getAberturaCode(val){
   const n=parseDecimalInput(val);
@@ -506,11 +537,6 @@ function getAberturaCode(val){
   if(n<1)return "0.1";
   if(n<=5)return "1";
   return "5";
-}
-function getEspesorCode(val){
-  const n=parseDecimalInput(val);
-  if(isNaN(n))return "";
-  return n<5?"1":"2";
 }
 function getContinuidadCode(val){
   const n=parseDecimalInput(val);
@@ -522,11 +548,10 @@ function getContinuidadCode(val){
   return "20";
 }
 function calcRow(row){
-  const espCode=getEspesorCode(row.esp);
   const alt=ALTERACION.find(x=>x.code===row.alt);
   const a89=alt?alt.r89:null, a76=alt?alt.r76:null;
-  const[r1_89,r1_76]=getRelleno(row.r1,espCode);
-  const[r2_89,r2_76]=getRelleno(row.r2,espCode);
+  const[r1_89,r1_76]=getRelleno(row.r1,row.esp);
+  const[r2_89,r2_76]=getRelleno(row.r2,row.esp);
   let rel89=null,rel76=null;
   if(r1_89!==null&&r2_89!==null){rel89=Math.min(r1_89,r2_89);rel76=Math.min(r1_76,r2_76);}
   else if(r1_89!==null){rel89=r1_89;rel76=r1_76;}
@@ -578,6 +603,7 @@ const emptyRow=(fam="1")=>({id:uid(),fam,dist:"",dip:"",dipdir:"",tipo:"JN",nstr
 let rows=[];
 try{const s=localStorage.getItem("mw_rows");rows=s?JSON.parse(s):[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
 catch{rows=[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
+rows=rows.map(ensureSelectDefaults);
 
 function saveRows(){try{localStorage.setItem("mw_rows",JSON.stringify(rows));}catch{}}
 function saveHdr(){
@@ -688,12 +714,13 @@ function onLito1Change() {
 // TABLE RENDER
 // ═══════════════════════════════════════════════════════
 const FAM_BG=["#1e293b","#1a2e3f","#1e2d3b","#1f2d38","#1e2f3f","#202c3d","#1d2e40","#1f2e3a","#1e2c3e"];
-function selOpts(opts,val,emptyLabel="—"){
-  let s=`<option value="">${emptyLabel}</option>`;
+function selOpts(opts,val){
+  const current=val||firstOptValue(opts);
+  let s="";
   opts.forEach(o=>{
     const code=typeof o==="string"?o:o.code;
     const lbl=typeof o==="string"?o:(o.label||o.desc||o.code);
-    s+=`<option value="${code}"${val===code?" selected":""}>${lbl}</option>`;
+    s+=`<option value="${code}"${current===code?" selected":""}>${lbl}</option>`;
   });
   return s;
 }
@@ -707,7 +734,7 @@ function makeRow(row,idx){
     <td style="position:sticky;left:0;background:${bg};z-index:5;">
       <input class="ti" value="${row.fam}" type="text" inputmode="numeric" maxlength="1" style="width:36px;color:var(--am);font-weight:700;background:transparent;" oninput="updateIntegerInput(this,'${row.id}','fam',1,9)" onchange="commitIntegerInput('${row.id}','fam',this.value,1,9)"/>
     </td>
-    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:46px" title="${distErr?`Excede ${largoMax}m`:""}" oninput="updateDecimalInput(this,'${row.id}','dist')" onchange="commitDecimalInput('${row.id}','dist',this.value)"/></td>
+    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:46px" title="${distErr?`Excede ${largoMax}m`:""}" oninput="updateBoundedDecimalInput(this,'${row.id}','dist',0,${largoMax})" onchange="commitBoundedDecimalInput('${row.id}','dist',this.value,0,${largoMax})"/></td>
     <td><input class="ti" value="${row.dip}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','dip',0,90)" onchange="commitIntegerInput('${row.id}','dip',this.value,0,90)"/></td>
     <td><input class="ti" value="${row.dipdir}" type="text" inputmode="numeric" maxlength="3" style="width:42px" oninput="updateIntegerInput(this,'${row.id}','dipdir',0,360)" onchange="commitIntegerInput('${row.id}','dipdir',this.value,0,360)"/></td>
     <td><select class="ts" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t=>({code:t.code,label:t.code})),row.tipo)}</select></td> 
@@ -725,7 +752,7 @@ function makeRow(row,idx){
     <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r1_76!==null?rt.r1_76:"—"}</td>
     <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r2_76!==null?rt.r2_76:"—"}</td>
     <td><input class="ti" value="${row.jrc}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','jrc',0,20)" onchange="commitIntegerInput('${row.id}','jrc',this.value,0,20)"/></td>
-    <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','rug',this.value)"><option value="">—</option>${Object.keys(RUGOSIDAD).map(k=>`<option value="${k}"${row.rug===k?" selected":""}>${k}</option>`).join("")}</select></td>
+    <td><input class="ti" value="${row.rug}" type="text" inputmode="numeric" maxlength="1" style="width:44px" oninput="updateIntegerInput(this,'${row.id}','rug',1,9)" onchange="commitIntegerInput('${row.id}','rug',this.value,1,9)"/></td>
     <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','forma',this.value)">${selOpts(FORMA_EST.map(f=>({code:f.code,label:f.code})),row.forma)}</select></td>
     <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','alt',this.value)">${selOpts(ALTERACION.map(a=>({code:a.code,label:a.code})),row.alt)}</select></td>
     ${d(rt.a89,"td89")}${d(rt.rel89,"td89")}${d(rt.co89,"td89")}${d(rt.ab89,"td89")}${d(rt.rug89,"td89")}${d(rt.v89,"td89v")}
