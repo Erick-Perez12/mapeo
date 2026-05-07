@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mapeo por Ventana Geomecánica</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#263148;--bd:#334155;--tx:#e2e8f0;--mu:#64748b;--am:#f59e0b;--or:#fb923c;--pk:#f472b6;--rd:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;}
+/* topbar */
+#topbar{position:sticky;top:0;z-index:50;background:#0c1525;border-bottom:1px solid var(--bd);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.logo{width:28px;height:28px;background:var(--am);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.app-title{font-size:13px;font-weight:700;}
+.app-sub{font-size:10px;color:var(--mu);}
+.tb-r{display:flex;gap:6px;flex-wrap:wrap;}
+/* buttons */
+button{cursor:pointer;border-radius:5px;font-size:12px;padding:5px 11px;border:1px solid var(--bd);background:var(--bg3);color:var(--tx);transition:background .15s;}
+button:hover{background:#334155;}
+.btn-am{background:var(--am);color:#0f172a;font-weight:700;border-color:var(--am);}
+.btn-am:hover{background:#d97706;}
+.btn-rd{background:rgba(239,68,68,.18);color:#fca5a5;border-color:rgba(239,68,68,.3);}
+.btn-rd:hover{background:rgba(239,68,68,.32);}
+.btn-fam{width:28px;height:26px;padding:0;font-weight:700;font-size:11px;color:var(--am);}
+.btn-fam:hover{background:var(--am);color:#0f172a;}
+.btn-sm{padding:4px 9px;font-size:11px;}
+/* main */
+#main{padding:12px;display:flex;flex-direction:column;gap:12px;}
+/* card */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px;}
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:6px;}
+/* inputs */
+.fi{background:#0f172a;border:1px solid var(--bd);border-radius:4px;color:var(--tx);padding:4px 8px;font-size:12px;width:100%;outline:none;}
+.fi:focus{border-color:var(--am);}
+.fs{background:#0f172a;border:1px solid var(--bd);border-radius:4px;color:var(--tx);padding:4px 6px;font-size:12px;width:100%;outline:none;cursor:pointer;}
+.fs:focus{border-color:var(--am);}
+.fl{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;display:block;}
+/* grid helpers */
+.g{display:grid;gap:8px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g6{grid-template-columns:repeat(6,1fr);}
+.g12{grid-template-columns:repeat(12,1fr);}
+/* table */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--bd);}
+table{border-collapse:collapse;min-width:max-content;}
+th,td{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:3px 4px;text-align:center;white-space:nowrap;font-size:11px;}
+th{background:#0c1525;font-weight:600;color:var(--mu);font-size:10px;padding:5px 4px;}
+th:last-child,td:last-child{border-right:none;}
+tr:last-child td{border-bottom:none;}
+.th89{background:rgba(251,146,60,.2);color:#fdba74;}
+.th76{background:rgba(244,114,182,.16);color:#f9a8d4;}
+.td89{background:rgba(251,146,60,.12);color:var(--or);}
+.td89v{background:rgba(251,146,60,.26);color:#fed7aa;font-weight:700;}
+.td76{background:rgba(244,114,182,.1);color:var(--pk);}
+.td76v{background:rgba(244,114,182,.2);color:#fbcfe8;font-weight:700;}
+.ti{background:transparent;border:none;color:var(--tx);text-align:center;font-size:11px;width:100%;padding:1px 2px;outline:none;}
+.ti:focus{background:rgba(245,158,11,.08);border-radius:2px;}
+.ti.err{color:var(--rd);}
+.ts{background:#1e293b;border:1px solid var(--bd);color:var(--tx);font-size:11px;width:100%;padding:1px 2px;border-radius:3px;cursor:pointer;outline:none;}
+.ts:focus{border-color:var(--am);}
+.del-btn{color:rgba(239,68,68,.45);background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;}
+.del-btn:hover{color:var(--rd);}
+.add-bar{background:#0c1525;border-top:1px solid var(--bd);padding:8px 12px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+/* summary */
+.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.stat-lbl{font-size:11px;color:var(--mu);min-width:160px;}
+.stat-v{padding:2px 10px;border-radius:4px;font-weight:700;font-family:monospace;font-size:13px;}
+.sv89{background:rgba(251,146,60,.16);color:var(--or);}
+.sv76{background:rgba(244,114,182,.13);color:var(--pk);}
+.sv-am{background:rgba(245,158,11,.16);color:var(--am);}
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd);}
+.mtitle{font-size:13px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.06em;}
+.mclose{background:none;border:none;color:var(--mu);font-size:22px;cursor:pointer;line-height:1;padding:0 4px;}
+.mclose:hover{color:#fff;}
+.mtabs{display:flex;gap:4px;padding:8px 12px 0;flex-wrap:wrap;}
+.mtab{font-size:10px;padding:4px 10px;border-radius:4px;}
+.mtab.act{background:var(--am);color:#0f172a;font-weight:700;border-color:var(--am);}
+.mtab:not(.act){background:var(--bg3);color:var(--mu);}
+.mtab:not(.act):hover{color:var(--tx);}
+.mbody{flex:1;overflow-y:auto;padding:12px 16px;}
+.ct{width:100%;border-collapse:collapse;font-size:12px;}
+.ct th{background:var(--bg3);padding:6px 10px;text-align:left;color:var(--am);font-weight:600;font-size:11px;border-bottom:1px solid var(--bd);}
+.ct td{padding:5px 10px;border-bottom:1px solid rgba(51,65,85,.5);}
+.ct tr:last-child td{border-bottom:none;}
+.co{background:rgba(251,146,60,.13);color:var(--or);font-weight:700;text-align:center;}
+.cp{background:rgba(244,114,182,.1);color:var(--pk);font-weight:700;text-align:center;}
+.ck{color:#fde68a;font-weight:700;}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="logo">⛏</div>
+    <div>
+      <div class="app-title">Mapeo por Ventana Geomecánica</div>
+      <div class="app-sub">Registro de Discontinuidades — RMR'89 &amp; '76</div>
+    </div>
+    <span id="td2-badge" style="display:none;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.3);color:var(--am);font-family:monospace;font-size:11px;"></span>
+  </div>
+  <div class="tb-r">
+    <button class="btn-sm" onclick="openCatalog()">📚 Catálogos</button>
+    <button class="btn-sm" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn-sm" onclick="exportJSON()">⬇ JSON</button>
+    <button class="btn-rd btn-sm" onclick="doReset()">Limpiar</button>
+  </div>
+</div>
+
+<div id="main">
+  <!-- HEADER FORM -->
+  <div>
+    <div class="sec-lbl">📋 Datos de Registro — Identificación de la ventana</div>
+    <div class="card">
+      <div class="g" style="grid-template-columns:130px 1fr 1fr 130px;gap:8px;margin-bottom:8px;">
+        <div><label class="fl">TD2</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001"/></div>
+        <div>
+          <label class="fl">Coordenadas INI (X / Y / Cota)</label>
+          <div class="g3" style="gap:4px;">
+            <input class="fi" id="h_iniX" oninput="onHdr()" placeholder="X"/>
+            <input class="fi" id="h_iniY" oninput="onHdr()" placeholder="Y"/>
+            <input class="fi" id="h_iniC" oninput="onHdr()" placeholder="Cota"/>
+          </div>
+        </div>
+        <div>
+          <label class="fl">Coordenadas FIN (X / Y / Cota)</label>
+          <div class="g3" style="gap:4px;">
+            <input class="fi" id="h_finX" oninput="onHdr()" placeholder="X"/>
+            <input class="fi" id="h_finY" oninput="onHdr()" placeholder="Y"/>
+            <input class="fi" id="h_finC" oninput="onHdr()" placeholder="Cota"/>
+          </div>
+        </div>
+        <div><label class="fl">Mapeador</label><input class="fi" id="h_mapeador" oninput="onHdr()" placeholder="Iniciales"/></div>
+      </div>
+      <div class="g g12" style="gap:6px;margin-bottom:8px;">
+        <div><label class="fl">Largo (m)</label><input class="fi" id="h_largo" oninput="onHdr()" value="10" type="number" min="0"/></div>
+        <div><label class="fl">Altura (m)</label><input class="fi" id="h_altura" oninput="onHdr()" value="15" type="number" min="0"/></div>
+        <div><label class="fl">Dip Taled°</label><input class="fi" id="h_dipT" oninput="onHdr()"/></div>
+        <div><label class="fl">DipDir Tale°</label><input class="fi" id="h_dipdirT" oninput="onHdr()"/></div>
+        <div><label class="fl">Dip Hole</label><input class="fi" id="h_dipH" oninput="onHdr()"/></div>
+        <div><label class="fl">Az Hole</label><input class="fi" id="h_azH" oninput="onHdr()"/></div>
+        <div><label class="fl">LITO-3</label><input class="fi" id="h_lito3" oninput="onHdr()"/></div>
+        <div><label class="fl">LMT_M</label><input class="fi" id="h_lmtM" oninput="onHdr()"/></div>
+        <div><label class="fl">Sector</label><input class="fi" id="h_sector" oninput="onHdr()"/></div>
+        <div><label class="fl">Este</label><input class="fi" id="h_este" oninput="onHdr()"/></div>
+        <div><label class="fl">Fase</label><input class="fi" id="h_fase" oninput="onHdr()"/></div>
+        <div><label class="fl">Nivel</label><input class="fi" id="h_nivel" oninput="onHdr()"/></div>
+      </div>
+      <div class="g g4" style="gap:6px;">
+        <div><label class="fl">Sect. GEOT</label><input class="fi" id="h_sectG" oninput="onHdr()"/></div>
+        <div>
+          <label class="fl">Intemperismo</label>
+          <select class="fs" id="h_intemp" onchange="onHdr()">
+            <option value="">-- seleccionar --</option>
+            <option value="f">f — Fresca</option>
+            <option value="d">d — Déb. meteorizada</option>
+            <option value="m">m — Mod. meteorizada</option>
+            <option value="a">a — Alt. meteorizada</option>
+            <option value="c">c — Comp. meteorizada</option>
+            <option value="s">s — Suelo residual</option>
+          </select>
+        </div>
+        <div><label class="fl">Alteración de Zona</label><input class="fi" id="h_altZona" oninput="onHdr()" placeholder="e.g. Propilítica"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div>
+    <div class="sec-lbl" id="tbl-lbl">⛏ Registro de Discontinuidades</div>
+    <div class="tbl-wrap">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th style="position:sticky;left:0;background:#0c1525;z-index:9;">Fam</th>
+            <th>Dist<br/>(m)</th><th>Dip<br/>(°)</th><th>DipDir<br/>(°)</th>
+            <th>Tipo Estr.</th><th>N°<br/>Estr.</th><th>Abertura</th>
+            <th>Espesor</th><th>Continuidad</th><th>Espac.<br/>(m)</th>
+            <th>N°<br/>Ext.</th><th>Term.</th>
+            <th>Relleno 1</th><th>Relleno 2</th>
+            <th>R1</th><th>R2</th>
+            <th>JRC</th><th>Rugos.</th><th>Forma</th><th>Alter.</th>
+            <th class="th89" colspan="6">Condición Discontinuidades (RMR'89)</th>
+            <th class="th76" colspan="6">Condición Discontinuidades (RMR'76)</th>
+            <th></th>
+          </tr>
+          <tr id="subhdr" style="background:#090f1c;font-size:10px;">
+            <th style="position:sticky;left:0;background:#090f1c;z-index:9;"></th>
+            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+            <th class="th89">Alt</th><th class="th89">Rel</th><th class="th89">Cont</th><th class="th89">Aber</th><th class="th89">Rug</th><th class="th89">Val</th>
+            <th class="th76">Alt</th><th class="th76">Rel</th><th class="th76">Cont</th><th class="th76">Aber</th><th class="th76">Rug</th><th class="th76">Val</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+      <div class="add-bar">
+        <span style="font-size:10px;color:var(--mu);">Agregar fila a familia:</span>
+        <button class="btn-fam btn-sm" onclick="addRow('1')">1</button>
+        <button class="btn-fam btn-sm" onclick="addRow('2')">2</button>
+        <button class="btn-fam btn-sm" onclick="addRow('3')">3</button>
+        <button class="btn-fam btn-sm" onclick="addRow('4')">4</button>
+        <button class="btn-fam btn-sm" onclick="addRow('5')">5</button>
+        <button class="btn-fam btn-sm" onclick="addRow('6')">6</button>
+        <button class="btn-fam btn-sm" onclick="addRow('7')">7</button>
+        <button class="btn-fam btn-sm" onclick="addRow('8')">8</button>
+        <button class="btn-fam btn-sm" onclick="addRow('9')">9</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div>
+    <div class="sec-lbl">📊 Resumen — Promedios RMR y JV</div>
+    <div class="card" id="summary-card"></div>
+  </div>
+</div>
+
+<!-- CATALOG MODAL -->
+<div class="overlay" id="cat-overlay" style="display:none;" onclick="if(event.target===this)closeCatalog()">
+  <div class="modal">
+    <div class="mhdr">
+      <span class="mtitle">Catálogos de Referencia</span>
+      <button class="mclose" onclick="closeCatalog()">×</button>
+    </div>
+    <div class="mtabs">
+      <button class="mtab act" onclick="showTab('tipos',this)">Tipos Estr.</button>
+      <button class="mtab" onclick="showTab('abertura',this)">Abertura</button>
+      <button class="mtab" onclick="showTab('continuidad',this)">Continuidad</button>
+      <button class="mtab" onclick="showTab('relleno',this)">Relleno/Espesor</button>
+      <button class="mtab" onclick="showTab('rugosidad',this)">Rugosidad</button>
+      <button class="mtab" onclick="showTab('forma',this)">Forma</button>
+      <button class="mtab" onclick="showTab('alteracion',this)">Meteorización</button>
+      <button class="mtab" onclick="showTab('jrc',this)">JRC</button>
+    </div>
+    <div class="mbody" id="cat-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CATÁLOGOS
+// ═══════════════════════════════════════════════════════
+const ABERTURA=[
+  {label:"Masiva",          code:"0",       mm:"0",    r89:6,r76:5},
+  {label:"Entre Abierta",   code:"0.000001",mm:"<0.1", r89:5,r76:4},
+  {label:"Abierta",         code:"0.1",     mm:"0.1–1",r89:3,r76:3},
+  {label:"Muy Abierta",     code:"1",       mm:"1–5",  r89:1,r76:1},
+  {label:"Ext. Abierta",    code:"5",       mm:">5",   r89:0,r76:0},
+];
+const CONTINUIDAD=[
+  {label:"<1 m",  code:"0", r89:6,r76:5},
+  {label:"1–3 m", code:"1", r89:4,r76:4},
+  {label:"3–10 m",code:"3", r89:2,r76:3},
+  {label:"10–20 m",code:"10",r89:1,r76:1},
+  {label:">20 m", code:"20",r89:0,r76:0},
+];
+const ESPESOR=[{label:"<5 mm",code:"1"},{label:">5 mm",code:"2"}];
+const RELLENO=[
+  {code:"cwf",tipo:3,sin89:6,sin76:5},
+  {code:"si", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
+  {code:"sf", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
+  {code:"ep", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
+  {code:"ox", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
+  {code:"g",  tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
+  {code:"cl", tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
+  {code:"ca", tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
+];
+const RUGOSIDAD={"1":[6,5],"2":[5,4],"3":[5,4],"4":[3,2],"5":[3,2],"6":[1,0],"7":[1,0],"8":[0,0],"9":[0,0]};
+const ALTERACION=[
+  {code:"f", label:"f — Fresca",             r89:6,r76:5},
+  {code:"d", label:"d — Déb. meteorizada",   r89:5,r76:5},
+  {code:"m", label:"m — Mod. meteorizada",   r89:3,r76:4},
+  {code:"a", label:"a — Alt. meteorizada",   r89:3,r76:3},
+  {code:"c", label:"c — Comp. meteorizada",  r89:2,r76:2},
+  {code:"s", label:"s — Suelo residual",     r89:1,r76:1},
+  {code:"-1",label:"-1 — Sin información",   r89:0,r76:0},
+];
+const TIPO_EST=[
+  {code:"JN",desc:"Junta"},{code:"BED",desc:"Estrato"},{code:"F",desc:"Falla"},
+  {code:"SZ",desc:"Cizalla"},{code:"CON",desc:"Contacto"},
+];
+const FORMA_EST=[
+  {code:"P",desc:"Plana"},{code:"C",desc:"Curva"},{code:"O",desc:"Ondulada"},
+  {code:"E",desc:"Escalonada"},{code:"I",desc:"Irregular"},
+];
+
+// ═══════════════════════════════════════════════════════
+// CÁLCULOS
+// ═══════════════════════════════════════════════════════
+function getRelleno(code,esp){
+  const r=RELLENO.find(x=>x.code===code);
+  if(!r)return[null,null];
+  if(r.tipo===3)return[r.sin89,r.sin76];
+  if(r.tipo===1){
+    if(esp==="1")return[r.dlt5_89,r.dlt5_76];
+    if(esp==="2")return[r.dgt5_89,r.dgt5_76];
+  }
+  if(r.tipo===2){
+    if(esp==="1")return[r.blt5_89,r.blt5_76];
+    if(esp==="2")return[r.bgt5_89,r.bgt5_76];
+  }
+  return[null,null];
+}
+function calcRow(row){
+  const alt=ALTERACION.find(x=>x.code===row.alt);
+  const a89=alt?alt.r89:null, a76=alt?alt.r76:null;
+  const[r1_89,r1_76]=getRelleno(row.r1,row.esp);
+  const[r2_89,r2_76]=getRelleno(row.r2,row.esp);
+  let rel89=null,rel76=null;
+  if(r1_89!==null&&r2_89!==null){rel89=Math.min(r1_89,r2_89);rel76=Math.min(r1_76,r2_76);}
+  else if(r1_89!==null){rel89=r1_89;rel76=r1_76;}
+  else if(r2_89!==null){rel89=r2_89;rel76=r2_76;}
+  const c=CONTINUIDAD.find(x=>x.code===row.cont);
+  const co89=c?c.r89:null,co76=c?c.r76:null;
+  const ab=ABERTURA.find(x=>x.code===row.aber);
+  const ab89=ab?ab.r89:null,ab76=ab?ab.r76:null;
+  const rp=RUGOSIDAD[row.rug];
+  const rug89=rp?rp[0]:null,rug76=rp?rp[1]:null;
+  const vs89=[a89,rel89,co89,ab89,rug89];
+  const vs76=[a76,rel76,co76,ab76,rug76];
+  const v89=vs89.every(v=>v!==null)?vs89.reduce((a,b)=>a+b,0):null;
+  const v76=vs76.every(v=>v!==null)?vs76.reduce((a,b)=>a+b,0):null;
+  return{a89,a76,rel89,rel76,co89,co76,ab89,ab76,rug89,rug76,v89,v76,r1_89,r2_89};
+}
+function calcSummary(){
+  const fams=[...new Set(rows.map(r=>r.fam))].sort();
+  let jv=0;
+  const fs=fams.map(f=>{
+    const fr=rows.filter(r=>r.fam===f);
+    const v89=fr.map(r=>calcRow(r).v89).filter(v=>v!==null);
+    const v76=fr.map(r=>calcRow(r).v76).filter(v=>v!==null);
+    const sps=fr.map(r=>parseFloat(r.espac)).filter(v=>!isNaN(v)&&v>0);
+    if(sps.length){const ms=sps.reduce((a,b)=>a+b,0)/sps.length;jv+=1/ms;}
+    return{fam:f,n:fr.length,a89:v89.length?v89.reduce((a,b)=>a+b,0)/v89.length:null,a76:v76.length?v76.reduce((a,b)=>a+b,0)/v76.length:null};
+  });
+  const all89=rows.map(r=>calcRow(r).v89).filter(v=>v!==null);
+  const all76=rows.map(r=>calcRow(r).v76).filter(v=>v!==null);
+  const fa89=fs.map(f=>f.a89).filter(v=>v!==null);
+  const fa76=fs.map(f=>f.a76).filter(v=>v!==null);
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  return{
+    p1_89:avg(all89),p1_76:avg(all76),
+    p2_89:avg(fa89),p2_76:avg(fa76),
+    p3_89:fa89.length?Math.min(...fa89):null,p3_76:fa76.length?Math.min(...fa76):null,
+    jv,fs
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let _uid=0;
+const uid=()=>`r${Date.now()}_${++_uid}`;
+const emptyRow=(fam="1")=>({id:uid(),fam,dist:"",dip:"",dipdir:"",tipo:"JN",nstr:"1",
+  aber:"",esp:"",cont:"",espac:"",next:"",term:"",r1:"",r2:"",jrc:"",rug:"",forma:"",alt:""});
+
+let rows=[];
+try{const s=localStorage.getItem("mw_rows");rows=s?JSON.parse(s):[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
+catch{rows=[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
+
+function saveRows(){try{localStorage.setItem("mw_rows",JSON.stringify(rows));}catch{}}
+function saveHdr(){
+  const h=getHdr();
+  try{localStorage.setItem("mw_hdr",JSON.stringify(h));}catch{}
+  const badge=document.getElementById("td2-badge");
+  if(h.td2){badge.textContent=h.td2;badge.style.display="";}else badge.style.display="none";
+  document.getElementById("tbl-lbl").textContent=`⛏ Registro de Discontinuidades  ·  ${rows.length} fila${rows.length!==1?"s":""}  ·  Largo máx: ${h.largo||"—"} m`;
+}
+function getHdr(){
+  return{
+    td2:v("h_td2"),iniX:v("h_iniX"),iniY:v("h_iniY"),iniC:v("h_iniC"),
+    finX:v("h_finX"),finY:v("h_finY"),finC:v("h_finC"),largo:v("h_largo"),
+    altura:v("h_altura"),dipT:v("h_dipT"),dipdirT:v("h_dipdirT"),
+    dipH:v("h_dipH"),azH:v("h_azH"),lito3:v("h_lito3"),lmtM:v("h_lmtM"),
+    sector:v("h_sector"),este:v("h_este"),fase:v("h_fase"),nivel:v("h_nivel"),
+    sectG:v("h_sectG"),intemp:v("h_intemp"),altZona:v("h_altZona"),mapeador:v("h_mapeador"),
+  };
+}
+function v(id){const e=document.getElementById(id);return e?e.value:"";}
+function sv(id,val){const e=document.getElementById(id);if(e)e.value=val||"";}
+function loadHdrToForm(){
+  try{
+    const s=localStorage.getItem("mw_hdr");if(!s)return;
+    const h=JSON.parse(s);
+    Object.entries(h).forEach(([k,val])=>sv("h_"+k,val));
+  }catch{}
+}
+
+function onHdr(){saveHdr();renderSummary();}
+
+// ═══════════════════════════════════════════════════════
+// TABLE RENDER
+// ═══════════════════════════════════════════════════════
+const FAM_BG=["#1e293b","#1a2e3f","#1e2d3b","#1f2d38","#1e2f3f","#202c3d","#1d2e40","#1f2e3a","#1e2c3e"];
+function selOpts(opts,val,emptyLabel="—"){
+  let s=`<option value="">${emptyLabel}</option>`;
+  opts.forEach(o=>{
+    const code=typeof o==="string"?o:o.code;
+    const lbl=typeof o==="string"?o:(o.label||o.desc||o.code);
+    s+=`<option value="${code}"${val===code?" selected":""}>${lbl}</option>`;
+  });
+  return s;
+}
+function makeRow(row,idx){
+  const rt=calcRow(row);
+  const bg=FAM_BG[(parseInt(row.fam)||1)-1];
+  const largoMax=parseFloat(v("h_largo"))||999;
+  const distErr=row.dist!==""&&parseFloat(row.dist)>largoMax;
+  const d=(val,cls="")=>val!==null&&val!==undefined?`<td class="${cls}">${val}</td>`:`<td class="${cls}" style="color:var(--mu)">—</td>`;
+  return `<tr id="tr_${row.id}" style="background:${bg};border-bottom:1px solid var(--bd);">
+    <td style="position:sticky;left:0;background:${bg};z-index:5;">
+      <select class="ts" style="width:36px;color:var(--am);font-weight:700;background:transparent;" onchange="updRow('${row.id}','fam',this.value)">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}"${row.fam===String(n)?" selected":""}>${n}</option>`).join("")}
+      </select>
+    </td>
+    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="number" min="0" step="0.5" style="width:46px" title="${distErr?`Excede ${largoMax}m`:""}" onchange="updRow('${row.id}','dist',this.value)"/></td>
+    <td><input class="ti" value="${row.dip}" type="number" min="0" max="90" style="width:38px" onchange="updRow('${row.id}','dip',this.value)"/></td>
+    <td><input class="ti" value="${row.dipdir}" type="number" min="0" max="360" style="width:42px" onchange="updRow('${row.id}','dipdir',this.value)"/></td>
+    <td><select class="ts" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t=>({code:t.code,label:t.code})),row.tipo,"JN")}</select></td>
+    <td><input class="ti" value="${row.nstr}" type="number" min="1" style="width:34px" onchange="updRow('${row.id}','nstr',this.value)"/></td>
+    <td><select class="ts" style="width:100px" onchange="updRow('${row.id}','aber',this.value)">${selOpts(ABERTURA,row.aber)}</select></td>
+    <td><select class="ts" style="width:64px" onchange="updRow('${row.id}','esp',this.value)">${selOpts(ESPESOR,row.esp)}</select></td>
+    <td><select class="ts" style="width:76px" onchange="updRow('${row.id}','cont',this.value)">${selOpts(CONTINUIDAD,row.cont)}</select></td>
+    <td><input class="ti" value="${row.espac}" type="number" min="0" step="0.01" style="width:44px" onchange="updRow('${row.id}','espac',this.value)"/></td>
+    <td><input class="ti" value="${row.next}" type="number" min="0" max="2" style="width:34px" onchange="updRow('${row.id}','next',this.value)"/></td>
+    <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','term',this.value)"><option value="">—</option><option value="R"${row.term==="R"?" selected":""}>R</option><option value="D"${row.term==="D"?" selected":""}>D</option><option value="S"${row.term==="S"?" selected":""}>S</option></select></td>
+    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r1',this.value)">${selOpts(RELLENO.map(r=>({code:r.code,label:r.code})),row.r1)}</select></td>
+    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r2',this.value)">${selOpts(RELLENO.map(r=>({code:r.code,label:r.code})),row.r2)}</select></td>
+    <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r1_89!==null?rt.r1_89:"—"}</td>
+    <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r2_89!==null?rt.r2_89:"—"}</td>
+    <td><input class="ti" value="${row.jrc}" type="number" min="0" max="20" step="0.5" style="width:38px" onchange="updRow('${row.id}','jrc',this.value)"/></td>
+    <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','rug',this.value)"><option value="">—</option>${Object.keys(RUGOSIDAD).map(k=>`<option value="${k}"${row.rug===k?" selected":""}>${k}</option>`).join("")}</select></td>
+    <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','forma',this.value)">${selOpts(FORMA_EST.map(f=>({code:f.code,label:f.code})),row.forma)}</select></td>
+    <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','alt',this.value)">${selOpts(ALTERACION.map(a=>({code:a.code,label:a.code})),row.alt)}</select></td>
+    ${d(rt.a89,"td89")}${d(rt.rel89,"td89")}${d(rt.co89,"td89")}${d(rt.ab89,"td89")}${d(rt.rug89,"td89")}${d(rt.v89,"td89v")}
+    ${d(rt.a76,"td76")}${d(rt.rel76,"td76")}${d(rt.co76,"td76")}${d(rt.ab76,"td76")}${d(rt.rug76,"td76")}${d(rt.v76,"td76v")}
+    <td><button class="del-btn" onclick="delRow('${row.id}')">×</button></td>
+  </tr>`;
+}
+
+function renderTable(){
+  document.getElementById("tbl-body").innerHTML=rows.map(makeRow).join("");
+  saveHdr();
+}
+function renderSummary(){
+  const s=calcSummary();
+  const fmt=v=>v!==null?v.toFixed(4):"—";
+  let html=`<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+    <div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">
+        PROMEDIOS
+        <span style="margin-left:10px;color:var(--or);font-size:10px;">■ RMR'89</span>
+        <span style="margin-left:8px;color:var(--pk);font-size:10px;">■ RMR'76</span>
+      </div>
+      ${[["PROM 1 (todos)",s.p1_89,s.p1_76],["PROM 2 (x familia)",s.p2_89,s.p2_76],["PROM 3 (peor familia)",s.p3_89,s.p3_76]].map(([lbl,v89,v76])=>`
+      <div class="stat-row">
+        <span class="stat-lbl">${lbl}</span>
+        <span class="stat-v sv89">${fmt(v89)}</span>
+        <span class="stat-v sv76">${fmt(v76)}</span>
+      </div>`).join("")}
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">ÍNDICE VOLUMÉTRICO</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--mu);font-size:12px;">JV =</span>
+        <span class="stat-v sv-am">${s.jv>0?s.jv.toFixed(4):"—"}</span>
+        <span style="font-size:10px;color:var(--mu);">jts/m³</span>
+      </div>
+    </div>`;
+  if(s.fs.length){
+    html+=`<div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">POR FAMILIA</div>
+      <table style="font-size:11px;border-collapse:collapse;">
+        <tr style="border-bottom:1px solid var(--bd);">
+          <th style="text-align:left;padding-right:12px;color:var(--mu);">Fam</th>
+          <th style="padding-right:10px;color:var(--mu);">N</th>
+          <th style="padding-right:8px;color:var(--or);">Avg 89</th>
+          <th style="color:var(--pk);">Avg 76</th>
+        </tr>
+        ${s.fs.map(f=>`<tr style="border-bottom:1px solid rgba(51,65,85,.4);">
+          <td style="padding-right:12px;color:var(--am);font-weight:700;padding-top:4px;">${f.fam}</td>
+          <td style="padding-right:10px;color:var(--mu);text-align:center;">${f.n}</td>
+          <td style="padding-right:8px;color:var(--or);text-align:center;font-family:monospace;">${f.a89!==null?f.a89.toFixed(1):"—"}</td>
+          <td style="color:var(--pk);text-align:center;font-family:monospace;">${f.a76!==null?f.a76.toFixed(1):"—"}</td>
+        </tr>`).join("")}
+      </table>
+    </div>`;
+  }
+  html+="</div>";
+  document.getElementById("summary-card").innerHTML=html;
+}
+
+function updRow(id,k,val){
+  const r=rows.find(x=>x.id===id);
+  if(r){r[k]=val;saveRows();renderTable();renderSummary();}
+}
+function addRow(fam){rows.push(emptyRow(fam));saveRows();renderTable();renderSummary();}
+function delRow(id){rows=rows.filter(r=>r.id!==id);saveRows();renderTable();renderSummary();}
+function doReset(){
+  if(confirm("¿Limpiar todos los datos del formulario?")){
+    rows=[emptyRow("1"),emptyRow("1"),emptyRow("2")];
+    saveRows();
+    document.querySelectorAll(".fi,.fs").forEach(e=>e.value=e.defaultValue||"");
+    sv("h_largo","10");sv("h_altura","15");
+    renderTable();renderSummary();saveHdr();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function dl(content,mime,fname){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([content],{type:mime}));
+  a.download=fname;a.click();URL.revokeObjectURL(a.href);
+}
+function exportCSV(){
+  const cols=["fam","dist","dip","dipdir","tipo","nstr","aber","esp","cont","espac","next","term","r1","r2","jrc","rug","forma","alt"];
+  const hd=["Familia","Dist_m","Dip","DipDir","Tipo","N_Estr","Abertura","Espesor","Continuidad","Espac_m","N_Ext","Term","Relleno1","Relleno2","JRC","Rugosidad","Forma","Alteracion"];
+  const csv=[hd.join(","),...rows.map(r=>cols.map(c=>r[c]).join(","))].join("\n");
+  dl(csv,"text/csv",`mapeo_${v("h_td2")||"sin_id"}_${new Date().toISOString().slice(0,10)}.csv`);
+}
+function exportJSON(){
+  dl(JSON.stringify({header:getHdr(),rows,fecha:new Date().toISOString()},null,2),"application/json",`mapeo_${v("h_td2")||"sin_id"}_${new Date().toISOString().slice(0,10)}.json`);
+}
+
+// ═══════════════════════════════════════════════════════
+// CATALOG MODAL
+// ═══════════════════════════════════════════════════════
+const CAT_CONTENT={
+  tipos:`<table class="ct"><thead><tr><th>Código</th><th>Descripción</th></tr></thead><tbody>
+    ${[{code:"JN",d:"Junta"},{code:"BED",d:"Estrato"},{code:"F",d:"Falla"},{code:"SZ",d:"Cizalla"},{code:"CON",d:"Contacto"}].map(r=>`<tr><td class="ck">${r.code}</td><td>${r.d}</td></tr>`).join("")}
+  </tbody></table>`,
+  abertura:`<table class="ct"><thead><tr><th>Abertura</th><th>Rango (mm)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${ABERTURA.map(r=>`<tr><td>${r.label}</td><td style="text-align:center;font-family:monospace;">${r.mm}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+  </tbody></table>`,
+  continuidad:`<table class="ct"><thead><tr><th>Continuidad</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${CONTINUIDAD.map(r=>`<tr><td>${r.label}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+  </tbody></table>`,
+  relleno:`<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Espesor determina columna Duro/Blando. Rating final = mínimo de Relleno 1 y Relleno 2 (peor caso).</p>
+    <table class="ct" style="margin-bottom:12px;"><thead><tr><th>Espesor (mm)</th><th>Código</th></tr></thead><tbody>
+      <tr><td>&lt;5 mm</td><td class="ck" style="text-align:center;">1</td></tr>
+      <tr><td>&gt;5 mm</td><td class="ck" style="text-align:center;">2</td></tr>
+    </tbody></table>
+    <table class="ct"><thead>
+      <tr><th>Relleno</th><th>Tipo</th><th class="co">Sin(89)</th><th class="co">D&lt;5(89)</th><th class="co">D&gt;5(89)</th><th class="co">B&lt;5(89)</th><th class="co">B&gt;5(89)</th>
+      <th class="cp">Sin(76)</th><th class="cp">D&lt;5(76)</th><th class="cp">D&gt;5(76)</th><th class="cp">B&lt;5(76)</th><th class="cp">B&gt;5(76)</th></tr>
+    </thead><tbody>
+      ${RELLENO.map(r=>`<tr><td class="ck">${r.code}</td><td style="text-align:center;">${r.tipo}</td>
+        <td class="co">${r.sin89??""}</td><td class="co">${r.dlt5_89??""}</td><td class="co">${r.dgt5_89??""}</td><td class="co">${r.blt5_89??""}</td><td class="co">${r.bgt5_89??""}</td>
+        <td class="cp">${r.sin76??""}</td><td class="cp">${r.dlt5_76??""}</td><td class="cp">${r.dgt5_76??""}</td><td class="cp">${r.blt5_76??""}</td><td class="cp">${r.bgt5_76??""}</td>
+      </tr>`).join("")}
+    </tbody></table>`,
+  rugosidad:`<table class="ct"><thead><tr><th>Perfil (1–9)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${Object.entries(RUGOSIDAD).map(([k,v])=>`<tr><td class="ck" style="text-align:center;">${k}</td><td class="co">${v[0]}</td><td class="cp">${v[1]}</td></tr>`).join("")}
+  </tbody></table>`,
+  forma:`<table class="ct"><thead><tr><th>Código</th><th>Forma de Estructura</th></tr></thead><tbody>
+    ${[{code:"P",desc:"Plana"},{code:"C",desc:"Curva"},{code:"O",desc:"Ondulada"},{code:"E",desc:"Escalonada"},{code:"I",desc:"Irregular"}].map(r=>`<tr><td class="ck">${r.code}</td><td>${r.desc}</td></tr>`).join("")}
+  </tbody></table>`,
+  alteracion:`<table class="ct"><thead><tr><th>Código</th><th>Grado de Meteorización</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${ALTERACION.map(r=>`<tr><td class="ck">${r.code}</td><td>${r.label.split("—")[1]?.trim()}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+  </tbody></table>`,
+  jrc:`<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Compare el perfil de la superficie de fractura con la figura JRC para determinar el valor de JRC (0–20) y el número de rugosidad (1–9).</p>
+    <table class="ct"><thead><tr><th>Rango JRC</th><th>N° Perfil Rugosidad</th></tr></thead><tbody>
+    ${[["0–2","9"],["2–4","8"],["4–6","7"],["6–8","6"],["8–10","5"],["10–12","4"],["12–14","3"],["14–16","2"],["16–18","1"],["18–20","1"]].map(([r,p])=>`<tr><td>${r}</td><td class="ck" style="text-align:center;">${p}</td></tr>`).join("")}
+    </tbody></table>
+    <p style="font-size:10px;color:var(--mu);margin-top:8px;">Fuente: ISRM 1989 — Perfiles de Rugosidad típicos. Rugosidad 1=más rugosa, 9=plana estriada.</p>`,
+};
+function openCatalog(){document.getElementById("cat-overlay").style.display="flex";showTab("tipos",document.querySelector(".mtab"));}
+function closeCatalog(){document.getElementById("cat-overlay").style.display="none";}
+function showTab(key,btn){
+  document.querySelectorAll(".mtab").forEach(b=>b.classList.remove("act"));
+  btn.classList.add("act");
+  document.getElementById("cat-body").innerHTML=CAT_CONTENT[key]||"";
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadHdrToForm();
+renderTable();
+renderSummary();
+saveHdr();
+</script>
+</body>
+</html>
