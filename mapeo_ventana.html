@@ -1,331 +1,931 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Mapeo por Ventana Geomecánica</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg: #0f172a;
-  --bg2: #1e293b;
-  --bg3: #263148;
-  --bd: #334155;
-  --tx: #e2e8f0;
-  --mu: #64748b;
-  --am: #f59e0b;
-  --or: #fb923c;
-  --pk: #f472b6;
-  --rd: #ef4444;
-  --gl: rgba(255, 255, 255, 0.05);
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--tx);font-family:'Outfit', system-ui, -apple-system, sans-serif;font-size:13px;line-height:1.5;}
-/* topbar */
-#topbar{position:sticky;top:0;z-index:50;background:rgba(12, 21, 37, 0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-.logo{width:32px;height:32px;background:linear-gradient(135deg, var(--am), var(--or));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 15px rgba(245, 158, 11, 0.3);}
-.app-title{font-size:14px;font-weight:700;letter-spacing:0.02em;}
-.app-sub{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;}
-.tb-r{display:flex;gap:8px;flex-wrap:wrap;}
-/* buttons */
-button{cursor:pointer;border-radius:6px;font-size:12px;padding:6px 12px;border:1px solid var(--bd);background:var(--bg3);color:var(--tx);transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);font-weight:500;}
-button:hover{background:var(--bd);transform:translateY(-1px);box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.2);}
-button:active{transform:translateY(0);}
-.btn-am{background:var(--am);color:#0f172a;font-weight:700;border-color:var(--am);}
-.btn-am:hover{background:#d97706;box-shadow:0 0 12px rgba(245, 158, 11, 0.4);}
-.btn-rd{background:rgba(239, 68, 68, 0.1);color:#fca5a5;border-color:rgba(239, 68, 68, 0.2);}
-.btn-rd:hover{background:rgba(239, 68, 68, 0.2);border-color:var(--rd);}
-.btn-fam{width:32px;height:32px;padding:0;font-weight:700;font-size:14px;color:var(--am);display:flex;align-items:center;justify-content:center;}
-.btn-fam:hover{background:var(--am);color:#0f172a;}
-.btn-sm{padding:4px 10px;font-size:11px;}
-/* main */
-#main{padding:16px;display:flex;flex-direction:column;gap:16px;max-width:1600px;margin:0 auto;}
-/* card */
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 4px 20px rgba(0, 0, 0, 0.2);position:relative;overflow:hidden;}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, var(--bd), transparent);}
-.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-.sec-lbl::after{content:'';height:1px;flex:1;background:var(--bd);opacity:0.5;}
-/* inputs */
-.fi{background:rgba(15, 23, 42, 0.6);border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:6px 10px;font-size:12px;width:100%;outline:none;transition:all 0.2s;}
-.fi:focus{border-color:var(--am);background:rgba(15, 23, 42, 0.8);box-shadow:0 0 0 3px rgba(245, 158, 11, 0.1);}
-.fs{background:rgba(15, 23, 42, 0.6);border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:6px 10px;font-size:12px;width:100%;outline:none;cursor:pointer;transition:all 0.2s;}
-.fs:focus{border-color:var(--am);background:rgba(15, 23, 42, 0.8);}
-.fl{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:block;}
-/* grid helpers */
-.g{display:grid;gap:12px;}
-.g2{grid-template-columns:1fr 1fr;}
-.g3{grid-template-columns:1fr 1fr 1fr;}
-.g4{grid-template-columns:repeat(4,1fr);}
-.g6{grid-template-columns:repeat(6,1fr);}
-.g12{grid-template-columns:repeat(12,1fr);}
-/* table */
-.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--bd);background:var(--bg2);}
-table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%;}
-th,td{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:6px 8px;text-align:center;white-space:nowrap;font-size:11px;}
-th{background:#0c1525;font-weight:600;color:var(--mu);font-size:10px;padding:8px 8px;text-transform:uppercase;letter-spacing:0.02em;}
-th:last-child,td:last-child{border-right:none;}
-tr:last-child td{border-bottom:none;}
-.th89{background:rgba(251, 146, 60, 0.1);color:var(--or);border-bottom:2px solid var(--or) !important;}
-.th76{background:rgba(244, 114, 182, 0.1);color:var(--pk);border-bottom:2px solid var(--pk) !important;}
-.td89{background:rgba(251, 146, 60, 0.05);color:var(--or);}
-.td89v{background:rgba(251, 146, 60, 0.15);color:#fed7aa;font-weight:700;}
-.td76{background:rgba(244, 114, 182, 0.05);color:var(--pk);}
-.td76v{background:rgba(244, 114, 182, 0.1);color:#fbcfe8;font-weight:700;}
-.ti{background:transparent;border:none;color:var(--tx);text-align:center;font-size:11px;width:100%;padding:2px;outline:none;border-radius:2px;}
-.ti:focus{background:rgba(245, 158, 11, 0.15);}
-.ti.err{color:var(--rd);background:rgba(239, 68, 68, 0.1);}
-.ts{background:var(--bg3);border:1px solid var(--bd);color:var(--tx);font-size:11px;width:100%;padding:2px;border-radius:4px;cursor:pointer;outline:none;}
-.ts:focus{border-color:var(--am);}
-.del-btn{color:var(--mu);background:none;border:none;cursor:pointer;font-size:16px;padding:0 4px;transition:color 0.2s;}
-.del-btn:hover{color:var(--rd);}
-.add-bar{background:#0c1525;border-top:1px solid var(--bd);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-/* summary */
-.stat-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-.stat-lbl{font-size:11px;color:var(--mu);min-width:140px;font-weight:600;}
-.stat-v{padding:4px 12px;border-radius:6px;font-weight:700;font-family:'JetBrains Mono', monospace;font-size:13px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.2); transition: all 0.3s ease;}
-.stat-v:hover{transform: scale(1.05); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);}
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.card { animation: fadeIn 0.4s ease-out; }
-.rmr-badge { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.rmr-badge:hover { transform: scale(1.1) translateY(-5px); cursor: default; }
-.sv89{background:rgba(251, 146, 60, 0.1);color:var(--or);border:1px solid rgba(251, 146, 60, 0.2);}
-.sv76{background:rgba(244, 114, 182, 0.1);color:var(--pk);border:1px solid rgba(244, 114, 182, 0.2);}
-.sv-am{background:rgba(245, 158, 11, 0.1);color:var(--am);border:1px solid rgba(245, 158, 11, 0.2);}
-/* RMR Table specific */
-.rmr-table th{font-size:9px;padding:6px 4px;line-height:1.1;}
-.rmr-table .yellow{background:rgba(255, 214, 0, 0.1);color:#fde68a;}
-.rmr-table .orange{background:rgba(251, 146, 60, 0.1);color:var(--or);}
-.rmr-table .blue{background:rgba(25, 118, 210, 0.1);color:#93c5fd;}
-.rmr-table .gray{background:rgba(84, 110, 122, 0.1);color:var(--mu);}
-.rmr-table td.yellow{background:rgba(255, 214, 0, 0.05);color:#fef3c7;}
-.rmr-table td.orange{background:rgba(251, 146, 60, 0.05);color:#ffedd5;}
-.rmr-table td.blue{background:rgba(25, 118, 210, 0.05);color:#dbeafe;}
-.row-r76{background:rgba(233, 30, 99, 0.05) !important;}
-.row-r89{background:rgba(249, 168, 37, 0.05) !important;}
-.rmr-badge{padding:4px 12px;border-radius:6px;font-weight:800;font-size:14px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(0,0,0,0.3);}
-.rb76{background:linear-gradient(135deg, #e91e63, #ad1457);color:#fff;}
-.rb89{background:linear-gradient(135deg, #f9a825, #f57f17);color:#fff;}
-.rmr-final{font-weight:900;font-size:15px;letter-spacing:0.02em;}
-.rf76{color:#f48fb1;text-shadow:0 0 10px rgba(233, 30, 99, 0.3);}
-.rf89{color:#ffe082;text-shadow:0 0 10px rgba(249, 168, 37, 0.3);}
-/* modal */
-.overlay{position:fixed;inset:0;background:rgba(2, 6, 17, 0.85);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
-.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:800px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 25px 50px -12px rgba(0, 0, 0, 0.5);}
-.mhdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,0.02);}
-.mtitle{font-size:14px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.1em;}
-.mclose{background:none;border:none;color:var(--mu);font-size:24px;cursor:pointer;line-height:1;padding:4px;transition:color 0.2s;}
-.mclose:hover{color:#fff;}
-.mtabs{display:flex;gap:6px;padding:12px 16px 0;flex-wrap:wrap;}
-.mtab{font-size:10px;padding:6px 12px;border-radius:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;}
-.mtab.act{background:var(--am);color:#0f172a;box-shadow:0 4px 10px rgba(245, 158, 11, 0.2);}
-.mtab:not(.act){background:var(--bg3);color:var(--mu);}
-.mtab:not(.act):hover{color:var(--tx);background:var(--bd);}
-.mbody{flex:1;overflow-y:auto;padding:16px 20px;}
-.ct{width:100%;border-collapse:collapse;font-size:12px;}
-.ct th{background:var(--bg3);padding:8px 12px;text-align:left;color:var(--am);font-weight:600;font-size:11px;border-bottom:2px solid var(--bd);}
-.ct td{padding:8px 12px;border-bottom:1px solid rgba(51, 65, 85, 0.4);}
-.ct tr:last-child td{border-bottom:none;}
-.co{background:rgba(251, 146, 60, 0.1);color:var(--or);font-weight:700;text-align:center;}
-.cp{background:rgba(244, 114, 182, 0.1);color:var(--pk);font-weight:700;text-align:center;}
-.ck{color:#fde68a;font-weight:700;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Mapeo por Ventana Geomecánica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg2: #1e293b;
+      --bg3: #263148;
+      --bd: #334155;
+      --tx: #e2e8f0;
+      --mu: #64748b;
+      --am: #f59e0b;
+      --or: #fb923c;
+      --pk: #f472b6;
+      --rd: #ef4444;
+      --gl: rgba(255, 255, 255, 0.05);
+    }
 
-</style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--tx);
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* topbar */
+    #topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(12, 21, 37, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--bd);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--am), var(--or));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .app-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .app-sub {
+      font-size: 10px;
+      color: var(--mu);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tb-r {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* buttons */
+    button {
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 12px;
+      padding: 6px 12px;
+      border: 1px solid var(--bd);
+      background: var(--bg3);
+      color: var(--tx);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: var(--bd);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-am {
+      background: var(--am);
+      color: #0f172a;
+      font-weight: 700;
+      border-color: var(--am);
+    }
+
+    .btn-am:hover {
+      background: #d97706;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-rd {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-rd:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--rd);
+    }
+
+    .btn-fam {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--am);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-fam:hover {
+      background: var(--am);
+      color: #0f172a;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    /* main */
+    #main {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* card */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--bd), transparent);
+    }
+
+    .sec-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--mu);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sec-lbl::after {
+      content: '';
+      height: 1px;
+      flex: 1;
+      background: var(--bd);
+      opacity: 0.5;
+    }
+
+    /* inputs */
+    .fi {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--bd);
+      border-radius: 6px;
+      color: var(--tx);
+      padding: 6px 10px;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .fi:focus {
+      border-color: var(--am);
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    .fs {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--bd);
+      border-radius: 6px;
+      color: var(--tx);
+      padding: 6px 10px;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .fs:focus {
+      border-color: var(--am);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .fl {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--mu);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    /* grid helpers */
+    .g {
+      display: grid;
+      gap: 12px;
+    }
+
+    .g2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .g3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .g4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .g6 {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .g12 {
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    /* table */
+    .tbl-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--bd);
+      background: var(--bg2);
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: max-content;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border-right: 1px solid var(--bd);
+      border-bottom: 1px solid var(--bd);
+      padding: 6px 8px;
+      text-align: center;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+
+    th {
+      background: #0c1525;
+      font-weight: 600;
+      color: var(--mu);
+      font-size: 10px;
+      padding: 8px 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .th89 {
+      background: rgba(251, 146, 60, 0.1);
+      color: var(--or);
+      border-bottom: 2px solid var(--or) !important;
+    }
+
+    .th76 {
+      background: rgba(244, 114, 182, 0.1);
+      color: var(--pk);
+      border-bottom: 2px solid var(--pk) !important;
+    }
+
+    .td89 {
+      background: rgba(251, 146, 60, 0.05);
+      color: var(--or);
+    }
+
+    .td89v {
+      background: rgba(251, 146, 60, 0.15);
+      color: #fed7aa;
+      font-weight: 700;
+    }
+
+    .td76 {
+      background: rgba(244, 114, 182, 0.05);
+      color: var(--pk);
+    }
+
+    .td76v {
+      background: rgba(244, 114, 182, 0.1);
+      color: #fbcfe8;
+      font-weight: 700;
+    }
+
+    .ti {
+      background: transparent;
+      border: none;
+      color: var(--tx);
+      text-align: center;
+      font-size: 11px;
+      width: 100%;
+      padding: 2px;
+      outline: none;
+      border-radius: 2px;
+    }
+
+    .ti:focus {
+      background: rgba(245, 158, 11, 0.15);
+    }
+
+    .ti.err {
+      color: var(--rd);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .ts {
+      background: var(--bg3);
+      border: 1px solid var(--bd);
+      color: var(--tx);
+      font-size: 11px;
+      width: 100%;
+      padding: 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .ts:focus {
+      border-color: var(--am);
+    }
+
+    .del-btn {
+      color: var(--mu);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      transition: color 0.2s;
+    }
+
+    .del-btn:hover {
+      color: var(--rd);
+    }
+
+    .add-bar {
+      background: #0c1525;
+      border-top: 1px solid var(--bd);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* summary */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--mu);
+      min-width: 140px;
+      font-weight: 600;
+    }
+
+    .stat-v {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-v:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .rmr-badge {
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .rmr-badge:hover {
+      transform: scale(1.1) translateY(-5px);
+      cursor: default;
+    }
+
+    .sv89 {
+      background: rgba(251, 146, 60, 0.1);
+      color: var(--or);
+      border: 1px solid rgba(251, 146, 60, 0.2);
+    }
+
+    .sv76 {
+      background: rgba(244, 114, 182, 0.1);
+      color: var(--pk);
+      border: 1px solid rgba(244, 114, 182, 0.2);
+    }
+
+    .sv-am {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--am);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* RMR Table specific */
+    .rmr-table th {
+      font-size: 9px;
+      padding: 6px 4px;
+      line-height: 1.1;
+    }
+
+    .rmr-table .yellow {
+      background: rgba(255, 214, 0, 0.1);
+      color: #fde68a;
+    }
+
+    .rmr-table .orange {
+      background: rgba(251, 146, 60, 0.1);
+      color: var(--or);
+    }
+
+    .rmr-table .blue {
+      background: rgba(25, 118, 210, 0.1);
+      color: #93c5fd;
+    }
+
+    .rmr-table .gray {
+      background: rgba(84, 110, 122, 0.1);
+      color: var(--mu);
+    }
+
+    .rmr-table td.yellow {
+      background: rgba(255, 214, 0, 0.05);
+      color: #fef3c7;
+    }
+
+    .rmr-table td.orange {
+      background: rgba(251, 146, 60, 0.05);
+      color: #ffedd5;
+    }
+
+    .rmr-table td.blue {
+      background: rgba(25, 118, 210, 0.05);
+      color: #dbeafe;
+    }
+
+    .row-r76 {
+      background: rgba(233, 30, 99, 0.05) !important;
+    }
+
+    .row-r89 {
+      background: rgba(249, 168, 37, 0.05) !important;
+    }
+
+    .rmr-badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .rb76 {
+      background: linear-gradient(135deg, #e91e63, #ad1457);
+      color: #fff;
+    }
+
+    .rb89 {
+      background: linear-gradient(135deg, #f9a825, #f57f17);
+      color: #fff;
+    }
+
+    .rmr-final {
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+
+    .rf76 {
+      color: #f48fb1;
+      text-shadow: 0 0 10px rgba(233, 30, 99, 0.3);
+    }
+
+    .rf89 {
+      color: #ffe082;
+      text-shadow: 0 0 10px rgba(249, 168, 37, 0.3);
+    }
+
+    /* modal */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 17, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .mhdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--bd);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .mtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--am);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .mclose {
+      background: none;
+      border: none;
+      color: var(--mu);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .mclose:hover {
+      color: #fff;
+    }
+
+    .mtabs {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .mtab {
+      font-size: 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .mtab.act {
+      background: var(--am);
+      color: #0f172a;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+    }
+
+    .mtab:not(.act) {
+      background: var(--bg3);
+      color: var(--mu);
+    }
+
+    .mtab:not(.act):hover {
+      color: var(--tx);
+      background: var(--bd);
+    }
+
+    .mbody {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .ct {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .ct th {
+      background: var(--bg3);
+      padding: 8px 12px;
+      text-align: left;
+      color: var(--am);
+      font-weight: 600;
+      font-size: 11px;
+      border-bottom: 2px solid var(--bd);
+    }
+
+    .ct td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+    }
+
+    .ct tr:last-child td {
+      border-bottom: none;
+    }
+
+    .co {
+      background: rgba(251, 146, 60, 0.1);
+      color: var(--or);
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .cp {
+      background: rgba(244, 114, 182, 0.1);
+      color: var(--pk);
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .ck {
+      color: #fde68a;
+      font-weight: 700;
+    }
+  </style>
 </head>
+
 <body>
-<div id="topbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div class="logo">⛏</div>
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="logo">⛏</div>
+      <div>
+        <div class="app-title">Mapeo por Ventana Geomecánica</div>
+        <div class="app-sub">Registro de Discontinuidades — RMR'89 &amp; '76</div>
+      </div>
+      <span id="td2-badge"
+        style="display:none;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.3);color:var(--am);font-family:monospace;font-size:11px;"></span>
+    </div>
+    <div class="tb-r">
+      <button class="btn-sm" onclick="openCatalog()">📚 Catálogos</button>
+      <button class="btn-sm" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn-sm" onclick="exportJSON()">⬇ JSON</button>
+      <button class="btn-rd btn-sm" onclick="doReset()">Limpiar</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <!-- HEADER FORM -->
     <div>
-      <div class="app-title">Mapeo por Ventana Geomecánica</div>
-      <div class="app-sub">Registro de Discontinuidades — RMR'89 &amp; '76</div>
-    </div>
-    <span id="td2-badge" style="display:none;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.3);color:var(--am);font-family:monospace;font-size:11px;"></span>
-  </div>
-  <div class="tb-r">
-    <button class="btn-sm" onclick="openCatalog()">📚 Catálogos</button>
-    <button class="btn-sm" onclick="exportCSV()">⬇ CSV</button>
-    <button class="btn-sm" onclick="exportJSON()">⬇ JSON</button>
-    <button class="btn-rd btn-sm" onclick="doReset()">Limpiar</button>
-  </div>
-</div>
+      <div class="sec-lbl">📋 Datos de Registro — Identificación de la ventana</div>
+      <div class="card">
+        <div class="g" style="grid-template-columns:130px 1fr 1fr 130px;gap:8px;margin-bottom:8px;">
+          <div><label class="fl">CELDA</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001" />
+          </div>
+          <div>
+            <label class="fl">Coordenadas INICIALES</label>
+            <div class="g3" style="gap:4px;">
 
-<div id="main">
-  <!-- HEADER FORM -->
-  <div>
-    <div class="sec-lbl">📋 Datos de Registro — Identificación de la ventana</div>
-    <div class="card">
-      <div class="g" style="grid-template-columns:130px 1fr 1fr 130px;gap:8px;margin-bottom:8px;">
-        <div><label class="fl">CELDA</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001"/></div>
-        <div>
-  <label class="fl">Coordenadas INICIALES</label>
-  <div class="g3" style="gap:4px;">
-    
-    <!-- ESTE: 6 enteros + 2 decimales -->
-    <input class="fi"
-           id="h_iniX"
-           placeholder="Este"
-           maxlength="9"
-           oninput="limitarDecimal(this,6,2); onHdr()"/>
+              <!-- ESTE: 6 enteros + 2 decimales -->
+              <input class="fi" id="h_iniX" placeholder="Este" maxlength="9"
+                oninput="limitarDecimal(this,6,2); onHdr()" />
 
-    <!-- NORTE: 7 enteros + 2 decimales -->
-    <input class="fi"
-           id="h_iniY"
-           placeholder="Norte"
-           maxlength="10"
-           oninput="limitarDecimal(this,7,2); onHdr()"/>
+              <!-- NORTE: 7 enteros + 2 decimales -->
+              <input class="fi" id="h_iniY" placeholder="Norte" maxlength="10"
+                oninput="limitarDecimal(this,7,2); onHdr()" />
 
-    <!-- COTA: 4 enteros + 2 decimales -->
-    <input class="fi"
-           id="h_iniC"
-           placeholder="Cota"
-           maxlength="7"
-           oninput="limitarDecimal(this,4,2); onHdr()"/>
-  </div>
-</div>
+              <!-- COTA: 4 enteros + 2 decimales -->
+              <input class="fi" id="h_iniC" placeholder="Cota" maxlength="7"
+                oninput="limitarDecimal(this,4,2); onHdr()" />
+            </div>
+          </div>
 
-<div>
-  <label class="fl">Coordenadas FINALES</label>
-  <div class="g3" style="gap:4px;">
+          <div>
+            <label class="fl">Coordenadas FINALES</label>
+            <div class="g3" style="gap:4px;">
 
-    <!-- ESTE -->
-    <input class="fi"
-           id="h_finX"
-           placeholder="Este"
-           maxlength="9"
-           oninput="limitarDecimal(this,6,2); onHdr()"/>
+              <!-- ESTE -->
+              <input class="fi" id="h_finX" placeholder="Este" maxlength="9"
+                oninput="limitarDecimal(this,6,2); onHdr()" />
 
-    <!-- NORTE -->
-    <input class="fi"
-           id="h_finY"
-           placeholder="Norte"
-           maxlength="10"
-           oninput="limitarDecimal(this,7,2); onHdr()"/>
+              <!-- NORTE -->
+              <input class="fi" id="h_finY" placeholder="Norte" maxlength="10"
+                oninput="limitarDecimal(this,7,2); onHdr()" />
 
-    <!-- COTA -->
-    <input class="fi"
-           id="h_finC"
-           placeholder="Cota"
-           maxlength="7"
-           oninput="limitarDecimal(this,4,2); onHdr()"/>
-  </div>
-</div>
+              <!-- COTA -->
+              <input class="fi" id="h_finC" placeholder="Cota" maxlength="7"
+                oninput="limitarDecimal(this,4,2); onHdr()" />
+            </div>
+          </div>
 
-<script>
-function limitarDecimal(input, enteros, decimales){
+          <script>
+            function limitarDecimal(input, enteros, decimales) {
 
-  // Solo números y punto
-  let valor = input.value.replace(/[^0-9.]/g, '');
+              // Solo números y punto
+              let valor = input.value.replace(/[^0-9.]/g, '');
 
-  // Evitar más de un punto
-  let partes = valor.split('.');
-  if(partes.length > 2){
-    valor = partes[0] + '.' + partes[1];
-  }
+              // Evitar más de un punto
+              let partes = valor.split('.');
+              if (partes.length > 2) {
+                valor = partes[0] + '.' + partes[1];
+              }
 
-  partes = valor.split('.');
+              partes = valor.split('.');
 
-  let entero = partes[0] || '';
-  let decimal = partes[1] || '';
+              let entero = partes[0] || '';
+              let decimal = partes[1] || '';
 
-  // Limitar enteros
-  entero = entero.slice(0, enteros);
+              // Limitar enteros
+              entero = entero.slice(0, enteros);
 
-  // Autoagregar punto al completar enteros
-  if(entero.length === enteros && !valor.includes('.')){
-    valor = entero + '.';
-  }else{
+              // Autoagregar punto al completar enteros
+              if (entero.length === enteros && !valor.includes('.')) {
+                valor = entero + '.';
+              } else {
 
-    // Limitar decimales
-    decimal = decimal.slice(0, decimales);
+                // Limitar decimales
+                decimal = decimal.slice(0, decimales);
 
-    valor = decimal !== ''
-      ? entero + '.' + decimal
-      : entero;
-  }
+                valor = decimal !== ''
+                  ? entero + '.' + decimal
+                  : entero;
+              }
 
-  // Validación final de decimales
-  if(valor.includes('.')){
-    let p = valor.split('.');
-    p[1] = (p[1] || '').slice(0, decimales);
-    valor = p[0] + '.' + p[1];
-  }
+              // Validación final de decimales
+              if (valor.includes('.')) {
+                let p = valor.split('.');
+                p[1] = (p[1] || '').slice(0, decimales);
+                valor = p[0] + '.' + p[1];
+              }
 
-  input.value = valor;
-}
-</script>
-        <div><label class="fl">Mapeador</label><input class="fi" id="h_mapeador" oninput="onHdr()" placeholder="Iniciales"/></div>
-      </div>
-      <div class="g g12" style="gap:6px;margin-bottom:8px;">
-        <div><label class="fl">Largo (m)</label><input class="fi" id="h_largo" oninput="onHdr()" value="10" type="number" min="0"/></div>
-        <div><label class="fl">Altura (m)</label><input class="fi" id="h_altura" oninput="onHdr()" value="15" type="number" min="0"/></div>
-        <div><label class="fl">Dip Talud°</label><input class="fi" id="h_dipT" type="number" min="0" max="90" oninput="validarGrados(this, 0, 90); onHdr()"/></div>
-        <div><label class="fl">Dip-Dir Talud°</label><input class="fi" id="h_dipdirT" type="number" min="0" max="360" oninput="validarGrados(this, 0, 360); onHdr()"/></div>
-        <div><label class="fl">Dip Hole</label><input class="fi" id="h_dipH" oninput="onHdr()"/></div>
-        <div><label class="fl">Az Hole</label><input class="fi" id="h_azH" oninput="onHdr()"/></div>
-        <div><label class="fl">LITO-1</label>
-          <select class="fs" id="h_lito1" onchange="onLito1Change()">
-            <option value="">-- seleccionar unidad --</option>
-          </select>
+              input.value = valor;
+            }
+          </script>
+          <div><label class="fl">Mapeador</label><input class="fi" id="h_mapeador" oninput="onHdr()"
+              placeholder="Iniciales" /></div>
         </div>
-        <div><label class="fl">LITO-2</label><input class="fi" id="h_lito2" oninput="onHdr()" readonly/></div>
-        <div><label class="fl">LITO-3</label><input class="fi" id="h_lito3" oninput="onHdr()" readonly/></div>
-        <div><label class="fl">GRUPO</label><input class="fi" id="h_lmtM" oninput="onHdr()"/></div>
-        <div><label class="fl">Sector</label><input class="fi" id="h_sector" oninput="onHdr()"/></div>
-        <div><label class="fl">Fase</label><input class="fi" id="h_fase" oninput="onHdr()"/></div>
-        <div><label class="fl">Nivel</label><input class="fi" id="h_nivel" oninput="onHdr()"/></div>
-        <div style="grid-column: span 2;"><label class="fl">Sect. GEOT</label><input class="fi" id="h_sectG" oninput="onHdr()"/></div>
-        <div style="grid-column: span 2;">
-          <label class="fl">Intemperismo</label>
-          <select class="fs" id="h_intemp" onchange="onHdr()">
-            <option value="">-- seleccionar --</option>
-            <option value="f">f — Fresca</option>
-            <option value="d">d — Déb. meteorizada</option>
-            <option value="m">m — Mod. meteorizada</option>
-            <option value="a">a — Alt. meteorizada</option>
-            <option value="c">c — Comp. meteorizada</option>
-            <option value="s">s — Suelo residual</option>
-          </select>
+        <div class="g g12" style="gap:6px;margin-bottom:8px;">
+          <div><label class="fl">Largo (m)</label><input class="fi" id="h_largo" oninput="onHdr()" value="10"
+              type="number" min="0" /></div>
+          <div><label class="fl">Altura (m)</label><input class="fi" id="h_altura" oninput="onHdr()" value="15"
+              type="number" min="0" /></div>
+          <div><label class="fl">Dip Talud°</label><input class="fi" id="h_dipT" type="number" min="0" max="90"
+              oninput="validarGrados(this, 0, 90); onHdr()" /></div>
+          <div><label class="fl">Dip-Dir Talud°</label><input class="fi" id="h_dipdirT" type="number" min="0" max="360"
+              oninput="validarGrados(this, 0, 360); onHdr()" /></div>
+          <div><label class="fl">Dip Hole</label><input class="fi" id="h_dipH" oninput="onHdr()" /></div>
+          <div><label class="fl">Az Hole</label><input class="fi" id="h_azH" oninput="onHdr()" /></div>
+          <div><label class="fl">LITO-1</label>
+            <select class="fs" id="h_lito1" onchange="onLito1Change()">
+              <option value="">-- seleccionar unidad --</option>
+            </select>
+          </div>
+          <div><label class="fl">LITO-2</label><input class="fi" id="h_lito2" oninput="onHdr()" readonly /></div>
+          <div><label class="fl">LITO-3</label><input class="fi" id="h_lito3" oninput="onHdr()" readonly /></div>
+          <div><label class="fl">GRUPO</label><input class="fi" id="h_lmtM" oninput="onHdr()" /></div>
+          <div><label class="fl">Sector</label><input class="fi" id="h_sector" oninput="onHdr()" /></div>
+          <div><label class="fl">Fase</label><input class="fi" id="h_fase" oninput="onHdr()" /></div>
+          <div><label class="fl">Nivel</label><input class="fi" id="h_nivel" oninput="onHdr()" /></div>
+          <div style="grid-column: span 2;"><label class="fl">Sect. GEOT</label><input class="fi" id="h_sectG"
+              oninput="onHdr()" /></div>
+          <div style="grid-column: span 2;">
+            <label class="fl">Intemperismo</label>
+            <select class="fs" id="h_intemp" onchange="onHdr()">
+              <option value="">-- seleccionar --</option>
+              <option value="f">f — Fresca</option>
+              <option value="d">d — Déb. meteorizada</option>
+              <option value="m">m — Mod. meteorizada</option>
+              <option value="a">a — Alt. meteorizada</option>
+              <option value="c">c — Comp. meteorizada</option>
+              <option value="s">s — Suelo residual</option>
+            </select>
+          </div>
+          <div style="grid-column: span 2;"><label class="fl">Alteración de Zona</label><input class="fi" id="h_altZona"
+              oninput="onHdr()" placeholder="e.g. Propilítica" /></div>
+          <div><label class="fl">Fecha</label><input class="fi" id="h_fecha" type="date" oninput="onHdr()" /></div>
         </div>
-        <div style="grid-column: span 2;"><label class="fl">Alteración de Zona</label><input class="fi" id="h_altZona" oninput="onHdr()" placeholder="e.g. Propilítica"/></div>
-        <div><label class="fl">Fecha</label><input class="fi" id="h_fecha" type="date" oninput="onHdr()"/></div>
       </div>
     </div>
-  </div>
 
-  <!-- TABLE -->
-  <div>
-    <div class="sec-lbl" id="tbl-lbl">⛏ Registro de Discontinuidades</div>
-    <div class="tbl-wrap">
-      <table id="data-table">
-        <thead>
-          <tr>
-            <th rowspan="2" style="position:sticky;left:0;background:#0c1525;z-index:9;">ID Fam</th>
-            <th rowspan="2">Dist_Estruct<br/>(m)</th><th rowspan="2">Dip_Estruct</th><th rowspan="2">DipDir_Estruct</th>
-            <th rowspan="2">Tipo_Estruct.</th><th rowspan="2">N°<br/>Estruct</th><th rowspan="2">Abertura(mm)</th>
-            <th rowspan="2">Espesor(mm)</th><th rowspan="2">Continuidad(m)</th><th rowspan="2">Espacionamiento<br/>(m)</th>
-            <th rowspan="2">N°<br/>Extremos visibles.</th><th rowspan="2">Terminacion</th>
-            <th rowspan="2">T. Relleno 1</th><th rowspan="2">T. Relleno 2</th>
-            <th class="th89" colspan="2">(RMR'89)</th>
-            <th class="th76" colspan="2">(RMR'76)</th>
-            <th rowspan="2">JRC</th><th rowspan="2">Rugosidad<br/>Estruct.</th><th rowspan="2">Forma<br/>Estruct.</th><th rowspan="2">Alteracion<br/>Estruct.</th>
-            <th class="th89" colspan="6">Condición Discontinuidades (RMR'89)</th>
-            <th class="th76" colspan="6">Condición Discontinuidades (RMR'76)</th>
-            <th rowspan="2"></th>
-          </tr>
-          <tr id="subhdr" style="background:#090f1c;font-size:10px;">
-            <th class="th89">V. R1</th><th class="th89">V. R2</th>
-            <th class="th76">V. R1</th><th class="th76">V. R2</th>
-            <th class="th89">Alt</th><th class="th89">Rel</th><th class="th89">Cont</th><th class="th89">Aber</th><th class="th89">Rug</th><th class="th89">Val</th>
-            <th class="th76">Alt</th><th class="th76">Rel</th><th class="th76">Cont</th><th class="th76">Aber</th><th class="th76">Rug</th><th class="th76">Val</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-body"></tbody>
-      </table>
-      <div class="add-bar">
-        <span style="font-size:10px;color:var(--mu);">Crear Familia:</span>
-        <!-- <select id="fam-control" class="ts" style="width:60px;">
+    <!-- TABLE -->
+    <div>
+      <div class="sec-lbl" id="tbl-lbl">⛏ Registro de Discontinuidades</div>
+      <div class="tbl-wrap">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="position:sticky;left:0;background:#0c1525;z-index:9;">ID Fam</th>
+              <th rowspan="2">Dist_Estruct<br />(m)</th>
+              <th rowspan="2">Dip_Estruct</th>
+              <th rowspan="2">DipDir_Estruct</th>
+              <th rowspan="2">Tipo_Estruct.</th>
+              <th rowspan="2">N°<br />Estruct</th>
+              <th rowspan="2">Abertura(mm)</th>
+              <th rowspan="2">Espesor(mm)</th>
+              <th rowspan="2">Continuidad(m)</th>
+              <th rowspan="2">Espaciamiento<br />(m)</th>
+              <th rowspan="2">N°<br />Extremos visibles.</th>
+              <th rowspan="2">Terminacion</th>
+              <th rowspan="2">T. Relleno 1</th>
+              <th rowspan="2">T. Relleno 2</th>
+              <th class="th89" colspan="2">(RMR'89)</th>
+              <th class="th76" colspan="2">(RMR'76)</th>
+              <th rowspan="2">JRC</th>
+              <th rowspan="2">Rugosidad<br />Estruct.</th>
+              <th rowspan="2">Forma<br />Estruct.</th>
+              <th rowspan="2">Alteracion<br />Estruct.</th>
+              <th class="th89" colspan="6">Condición Discontinuidades (RMR'89)</th>
+              <th class="th76" colspan="6">Condición Discontinuidades (RMR'76)</th>
+              <th rowspan="2"></th>
+            </tr>
+            <tr id="subhdr" style="background:#090f1c;font-size:10px;">
+              <th class="th89">V. R1</th>
+              <th class="th89">V. R2</th>
+              <th class="th76">V. R1</th>
+              <th class="th76">V. R2</th>
+              <th class="th89">Alt</th>
+              <th class="th89">Rel</th>
+              <th class="th89">Cont</th>
+              <th class="th89">Aber</th>
+              <th class="th89">Rug</th>
+              <th class="th89">Val</th>
+              <th class="th76">Alt</th>
+              <th class="th76">Rel</th>
+              <th class="th76">Cont</th>
+              <th class="th76">Aber</th>
+              <th class="th76">Rug</th>
+              <th class="th76">Val</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+        <div class="add-bar">
+          <span style="font-size:10px;color:var(--mu);">Crear Familia:</span>
+          <!-- <select id="fam-control" class="ts" style="width:60px;">
           <option value="1">1</option>
           <option value="2">2</option>
           <option value="3">3</option>
@@ -336,890 +936,780 @@ function limitarDecimal(input, enteros, decimales){
           <option value="8">8</option>
           <option value="9">9</option>
         </select> -->
-        <button class="btn-fam btn-sm" type="button" title="Agregar fila" onclick="addRowFromControl()">+</button>
-        <button class="btn-fam btn-sm" type="button" title="Eliminar ultima fila de la familia" onclick="removeLastRowFromControl()">-</button>
+          <button class="btn-fam btn-sm" type="button" title="Agregar fila" onclick="addRowFromControl()">+</button>
+          <button class="btn-fam btn-sm" type="button" title="Eliminar ultima fila de la familia"
+            onclick="removeLastRowFromControl()">-</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- SUMMARY -->
-  <div>
-    <div class="sec-lbl">📊 Resumen — Promedios RMR y JV</div>
-    <div class="card" id="summary-card"></div>
-  </div>
+    <!-- SUMMARY -->
+    <div>
+      <div class="sec-lbl">📊 Resumen — Promedios RMR y JV</div>
+      <div class="card" id="summary-card"></div>
+    </div>
 
-  <!-- RMR SECTION -->
-  <div id="rmr-section" style="display:none;">
-    <div class="sec-lbl">🔬 Resumen RMR — Ventana de Mapeo</div>
-    <div class="card" style="padding: 20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--bd);padding-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="logo" style="width:24px;height:24px;font-size:12px;">RMR</div>
-          <div>
-            <div style="font-weight:800;font-size:14px;color:var(--tx);">Análisis Geomecánico RMR</div>
-            <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;">
-              Código: <span id="r_tdCode" style="color:var(--am);font-weight:700;">—</span> &nbsp;|&nbsp; 
-              Fecha: <span id="r_fecha" style="color:var(--tx);">—</span>
+    <!-- RMR SECTION -->
+    <div id="rmr-section" style="display:none;">
+      <div class="sec-lbl">🔬 Resumen RMR — Ventana de Mapeo</div>
+      <div class="card" style="padding: 20px;">
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--bd);padding-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="logo" style="width:24px;height:24px;font-size:12px;">RMR</div>
+            <div>
+              <div style="font-weight:800;font-size:14px;color:var(--tx);">Análisis Geomecánico RMR</div>
+              <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;">
+                Código: <span id="r_tdCode" style="color:var(--am);font-weight:700;">—</span> &nbsp;|&nbsp;
+                Fecha: <span id="r_fecha" style="color:var(--tx);">—</span>
+              </div>
             </div>
           </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-rd btn-sm" onclick="toggleRMR()" style="border-radius:20px;">✕ Cerrar Panel</button>
+          </div>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-rd btn-sm" onclick="toggleRMR()" style="border-radius:20px;">✕ Cerrar Panel</button>
-        </div>
-      </div>
 
-      <!-- RMR Inputs Grid -->
-      <div class="g" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--bd);">
-        <div style="grid-column: span 2;">
-          <label class="fl">💧 Condición de Agua</label>
-          <select class="fs" id="r_agua" onchange="recalcRMR()">
-            <option value="C">C — Completamente seco</option>
-            <option value="H">H — Húmedo</option>
-            <option value="M">M — Mojado</option>
-            <option value="E">E — Goteando</option>
-            <option value="F">F — Fluyendo</option>
-          </select>
+        <!-- RMR Inputs Grid -->
+        <div class="g"
+          style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--bd);">
+          <div style="grid-column: span 2;">
+            <label class="fl">💧 Condición de Agua</label>
+            <select class="fs" id="r_agua" onchange="recalcRMR()">
+              <option value="C">C — Completamente seco</option>
+              <option value="H">H — Húmedo</option>
+              <option value="M">M — Mojado</option>
+              <option value="E">E — Goteando</option>
+              <option value="F">F — Fluyendo</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl">UCS (MPa)</label>
+            <input class="fi" type="number" id="r_ucs" value="74" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">is50 (MPa)</label>
+            <input class="fi" type="number" id="r_is50" value="5" step="0.1" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">Cond. SUP</label>
+            <input class="fi" id="r_gsiCond" value="G" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">Estruc.</label>
+            <input class="fi" id="r_gsiEstruc" value="VB" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">GSI Vis.</label>
+            <input class="fi" type="number" id="r_gsiVisual" value="56" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">Ctrl. Est.</label>
+            <input class="fi" type="number" id="r_ctrl" value="3" onchange="recalcRMR()">
+          </div>
+          <div>
+            <label class="fl">Ef. Vol.</label>
+            <input class="fi" type="number" id="r_vol" value="3" onchange="recalcRMR()">
+          </div>
         </div>
-        <div>
-          <label class="fl">UCS (MPa)</label>
-          <input class="fi" type="number" id="r_ucs" value="74" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">is50 (MPa)</label>
-          <input class="fi" type="number" id="r_is50" value="5" step="0.1" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">Cond. SUP</label>
-          <input class="fi" id="r_gsiCond" value="G" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">Estruc.</label>
-          <input class="fi" id="r_gsiEstruc" value="VB" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">GSI Vis.</label>
-          <input class="fi" type="number" id="r_gsiVisual" value="56" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">Ctrl. Est.</label>
-          <input class="fi" type="number" id="r_ctrl" value="3" onchange="recalcRMR()">
-        </div>
-        <div>
-          <label class="fl">Ef. Vol.</label>
-          <input class="fi" type="number" id="r_vol" value="3" onchange="recalcRMR()">
-        </div>
-      </div>
 
-      <!-- Result Badges -->
-      <div style="display:flex;gap:16px;margin-bottom:16px;justify-content:center;">
-        <div class="rmr-badge rb76">
-          <span style="font-size:10px;opacity:0.9;">RMR'76</span>
-          <span id="rmr76_val" style="font-size:20px;">—</span>
+        <!-- Result Badges -->
+        <div style="display:flex;gap:16px;margin-bottom:16px;justify-content:center;">
+          <div class="rmr-badge rb76">
+            <span style="font-size:10px;opacity:0.9;">RMR'76</span>
+            <span id="rmr76_val" style="font-size:20px;">—</span>
+          </div>
+          <div class="rmr-badge rb89">
+            <span style="font-size:10px;opacity:0.9;">RMR'89</span>
+            <span id="rmr89_val" style="font-size:20px;">—</span>
+          </div>
         </div>
-        <div class="rmr-badge rb89">
-          <span style="font-size:10px;opacity:0.9;">RMR'89</span>
-          <span id="rmr89_val" style="font-size:20px;">—</span>
+
+        <!-- RMR Result Table -->
+        <div class="tbl-wrap" style="border-radius:8px; border-color: rgba(51, 65, 85, 0.5);">
+          <table class="rmr-table">
+            <thead>
+              <tr>
+                <th style="width:50px; background: #0c1525;">RATING</th>
+                <th class="yellow">Cond. Agua</th>
+                <th class="yellow">Valor Agua</th>
+                <th class="yellow">Resistencia</th>
+                <th class="yellow">Val Resist.</th>
+                <th class="gray">Cond. SUP</th>
+                <th class="gray">Estruc. GSI</th>
+                <th class="gray">GSI Visual</th>
+                <th class="gray">Ctrl. Estruc.</th>
+                <th class="gray">Ef. Voladura</th>
+                <th class="orange">RQD Valor</th>
+                <th class="orange">RQD (%)</th>
+                <th class="blue">Frec. Frac.</th>
+                <th class="blue">Tam. Bloque</th>
+                <th class="blue">Espac. Prom</th>
+                <th class="orange">Espac. Val</th>
+                <th class="orange">Val ConDisc</th>
+                <th class="gray" style="background: var(--bd);">RMR FINAL</th>
+                <th class="gray">UCS (MPa)</th>
+                <th class="gray">is50 (MPa)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-r76">
+                <td style="font-weight:900; color:var(--pk); background: rgba(233, 30, 99, 0.1);">76</td>
+                <td class="yellow" id="r76_agua">—</td>
+                <td class="yellow" id="r76_aguaVal">—</td>
+                <td class="yellow" id="r76_resist">—</td>
+                <td class="yellow" id="r76_resistVal">—</td>
+                <td id="r76_gsiCond">—</td>
+                <td id="r76_gsiEstruc">—</td>
+                <td id="r76_gsiVisual">—</td>
+                <td id="r76_ctrl">—</td>
+                <td id="r76_vol">—</td>
+                <td class="orange" id="r76_rqdVal">—</td>
+                <td class="orange" id="r76_rqdPct">—</td>
+                <td id="r76_freq">—</td>
+                <td id="r76_bloque">—</td>
+                <td class="blue" id="r76_espacProm">—</td>
+                <td class="orange" id="r76_espacVal">—</td>
+                <td class="orange" id="r76_condisc">—</td>
+                <td class="rmr-final rf76" id="r76_rmr" style="background: rgba(233, 30, 99, 0.15);">—</td>
+                <td id="r76_ucs">—</td>
+                <td id="r76_is50">—</td>
+              </tr>
+              <tr class="row-r89">
+                <td style="font-weight:900; color:var(--am); background: rgba(249, 168, 37, 0.1);">89</td>
+                <td class="yellow" id="r89_agua">—</td>
+                <td class="yellow" id="r89_aguaVal">—</td>
+                <td class="yellow" id="r89_resist">—</td>
+                <td class="yellow" id="r89_resistVal">—</td>
+                <td id="r89_gsiCond">—</td>
+                <td id="r89_gsiEstruc">—</td>
+                <td id="r89_gsiVisual">—</td>
+                <td id="r89_ctrl">—</td>
+                <td id="r89_vol">—</td>
+                <td class="orange" id="r89_rqdVal">—</td>
+                <td class="orange" id="r89_rqdPct">—</td>
+                <td id="r89_freq">—</td>
+                <td id="r89_bloque">—</td>
+                <td class="blue" id="r89_espacProm">—</td>
+                <td class="orange" id="r89_espacVal">—</td>
+                <td class="orange" id="r89_condisc">—</td>
+                <td class="rmr-final rf89" id="r89_rmr" style="background: rgba(249, 168, 37, 0.15);">—</td>
+                <td id="r89_ucs">—</td>
+                <td id="r89_is50">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Formula Bar -->
+        <div
+          style="margin-top:12px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px; border-left: 3px solid var(--am); font-size:11px; color:var(--mu); font-family:'JetBrains Mono', monospace;"
+          id="rmr_formula">
+          Calculando parámetros...
         </div>
       </div>
+    </div>
 
-      <!-- RMR Result Table -->
-      <div class="tbl-wrap" style="border-radius:8px; border-color: rgba(51, 65, 85, 0.5);">
-        <table class="rmr-table">
-          <thead>
-            <tr>
-              <th style="width:50px; background: #0c1525;">RATING</th>
-              <th class="yellow">Cond. Agua</th>
-              <th class="yellow">Valor Agua</th>
-              <th class="yellow">Resistencia</th>
-              <th class="yellow">Val Resist.</th>
-              <th class="gray">Cond. SUP</th>
-              <th class="gray">Estruc. GSI</th>
-              <th class="gray">GSI Visual</th>
-              <th class="gray">Ctrl. Estruc.</th>
-              <th class="gray">Ef. Voladura</th>
-              <th class="orange">RQD Valor</th>
-              <th class="orange">RQD (%)</th>
-              <th class="blue">Frec. Frac.</th>
-              <th class="blue">Tam. Bloque</th>
-              <th class="blue">Espac. Prom</th>
-              <th class="orange">Espac. Val</th>
-              <th class="orange">Val ConDisc</th>
-              <th class="gray" style="background: var(--bd);">RMR FINAL</th>
-              <th class="gray">UCS (MPa)</th>
-              <th class="gray">is50 (MPa)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="row-r76">
-              <td style="font-weight:900; color:var(--pk); background: rgba(233, 30, 99, 0.1);">76</td>
-              <td class="yellow" id="r76_agua">—</td>
-              <td class="yellow" id="r76_aguaVal">—</td>
-              <td class="yellow" id="r76_resist">—</td>
-              <td class="yellow" id="r76_resistVal">—</td>
-              <td id="r76_gsiCond">—</td>
-              <td id="r76_gsiEstruc">—</td>
-              <td id="r76_gsiVisual">—</td>
-              <td id="r76_ctrl">—</td>
-              <td id="r76_vol">—</td>
-              <td class="orange" id="r76_rqdVal">—</td>
-              <td class="orange" id="r76_rqdPct">—</td>
-              <td id="r76_freq">—</td>
-              <td id="r76_bloque">—</td>
-              <td class="blue" id="r76_espacProm">—</td>
-              <td class="orange" id="r76_espacVal">—</td>
-              <td class="orange" id="r76_condisc">—</td>
-              <td class="rmr-final rf76" id="r76_rmr" style="background: rgba(233, 30, 99, 0.15);">—</td>
-              <td id="r76_ucs">—</td>
-              <td id="r76_is50">—</td>
-            </tr>
-            <tr class="row-r89">
-              <td style="font-weight:900; color:var(--am); background: rgba(249, 168, 37, 0.1);">89</td>
-              <td class="yellow" id="r89_agua">—</td>
-              <td class="yellow" id="r89_aguaVal">—</td>
-              <td class="yellow" id="r89_resist">—</td>
-              <td class="yellow" id="r89_resistVal">—</td>
-              <td id="r89_gsiCond">—</td>
-              <td id="r89_gsiEstruc">—</td>
-              <td id="r89_gsiVisual">—</td>
-              <td id="r89_ctrl">—</td>
-              <td id="r89_vol">—</td>
-              <td class="orange" id="r89_rqdVal">—</td>
-              <td class="orange" id="r89_rqdPct">—</td>
-              <td id="r89_freq">—</td>
-              <td id="r89_bloque">—</td>
-              <td class="blue" id="r89_espacProm">—</td>
-              <td class="orange" id="r89_espacVal">—</td>
-              <td class="orange" id="r89_condisc">—</td>
-              <td class="rmr-final rf89" id="r89_rmr" style="background: rgba(249, 168, 37, 0.15);">—</td>
-              <td id="r89_ucs">—</td>
-              <td id="r89_is50">—</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Formula Bar -->
-      <div style="margin-top:12px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px; border-left: 3px solid var(--am); font-size:11px; color:var(--mu); font-family:'JetBrains Mono', monospace;" id="rmr_formula">
-        Calculando parámetros...
-      </div>
+    <!-- RMR Toggle Button -->
+    <div style="margin:16px 0;">
+      <button class="btn-am" onclick="toggleRMR()"
+        style="width:100%; padding: 12px; font-size: 13px; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        PARAMETROS DE VENTANA
+      </button>
     </div>
   </div>
 
-  <!-- RMR Toggle Button -->
-  <div style="margin:16px 0;">
-    <button class="btn-am" onclick="toggleRMR()" style="width:100%; padding: 12px; font-size: 13px; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 8px;">
-       PARAMETROS DE VENTANA
-    </button>
-  </div>
-</div>
-
-<!-- CATALOG MODAL -->
-<div class="overlay" id="cat-overlay" style="display:none;" onclick="if(event.target===this)closeCatalog()">
-  <div class="modal">
-    <div class="mhdr">
-      <span class="mtitle">Catálogos de Referencia</span>
-      <button class="mclose" onclick="closeCatalog()">×</button>
+  <!-- CATALOG MODAL -->
+  <div class="overlay" id="cat-overlay" style="display:none;" onclick="if(event.target===this)closeCatalog()">
+    <div class="modal">
+      <div class="mhdr">
+        <span class="mtitle">Catálogos de Referencia</span>
+        <button class="mclose" onclick="closeCatalog()">×</button>
+      </div>
+      <div class="mtabs">
+        <button class="mtab act" onclick="showTab('tipos',this)">Tipos Estr.</button>
+        <button class="mtab" onclick="showTab('abertura',this)">Abertura</button>
+        <button class="mtab" onclick="showTab('continuidad',this)">Continuidad</button>
+        <button class="mtab" onclick="showTab('relleno',this)">Relleno/Espesor</button>
+        <button class="mtab" onclick="showTab('rugosidad',this)">Rugosidad</button>
+        <button class="mtab" onclick="showTab('forma',this)">Forma</button>
+        <button class="mtab" onclick="showTab('alteracion',this)">Meteorización</button>
+        <button class="mtab" onclick="showTab('jrc',this)">JRC</button>
+      </div>
+      <div class="mbody" id="cat-body"></div>
     </div>
-    <div class="mtabs">
-      <button class="mtab act" onclick="showTab('tipos',this)">Tipos Estr.</button>
-      <button class="mtab" onclick="showTab('abertura',this)">Abertura</button>
-      <button class="mtab" onclick="showTab('continuidad',this)">Continuidad</button>
-      <button class="mtab" onclick="showTab('relleno',this)">Relleno/Espesor</button>
-      <button class="mtab" onclick="showTab('rugosidad',this)">Rugosidad</button>
-      <button class="mtab" onclick="showTab('forma',this)">Forma</button>
-      <button class="mtab" onclick="showTab('alteracion',this)">Meteorización</button>
-      <button class="mtab" onclick="showTab('jrc',this)">JRC</button>
-    </div>
-    <div class="mbody" id="cat-body"></div>
   </div>
-</div>
 
-<script>
-// ═══════════════════════════════════════════════════════
-// CATÁLOGOS
-// ═══════════════════════════════════════════════════════
-const ABERTURA=[
-  {label:"Masiva",          code:"0",       mm:"0",    r89:6,r76:5},
-  {label:"Entre Abierta",   code:"0.000001",mm:"<0.1", r89:5,r76:4},
-  {label:"Abierta",         code:"0.1",     mm:"0.1–1",r89:3,r76:3},
-  {label:"Muy Abierta",     code:"1",       mm:"1–5",  r89:1,r76:1},
-  {label:"Ext. Abierta",    code:"5",       mm:">5",   r89:0,r76:0},
-];
-const CONTINUIDAD=[
-  {label:"<1 m",  code:"0", r89:6,r76:5},
-  {label:"1–3 m", code:"1", r89:4,r76:4},
-  {label:"3–10 m",code:"3", r89:2,r76:3},
-  {label:"10–20 m",code:"10",r89:1,r76:1},
-  {label:">20 m", code:"20",r89:0,r76:0},
-];
-const ESPESOR=[{label:"<5 mm",code:"1"},{label:">5 mm",code:"2"}];
-const RELLENO=[
-  {code:"cwf",tipo:3,sin89:6,sin76:5},
-  {code:"si", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
-  {code:"sf", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
-  {code:"ep", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
-  {code:"ox", tipo:1,dlt5_89:4,dlt5_76:4,dgt5_89:2,dgt5_76:3},
-  {code:"g",  tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
-  {code:"cl", tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
-  {code:"ca", tipo:2,blt5_89:2,blt5_76:2,bgt5_89:0,bgt5_76:0},
-];
-const RUGOSIDAD={"1":[6,5],"2":[5,4],"3":[5,4],"4":[3,2],"5":[3,2],"6":[1,0],"7":[1,0],"8":[0,0],"9":[0,0]};
-const ALTERACION=[
-  {code:"f", label:"f — Fresca",             r89:6,r76:5},
-  {code:"d", label:"d — Déb. meteorizada",   r89:5,r76:5},
-  {code:"m", label:"m — Mod. meteorizada",   r89:3,r76:4},
-  {code:"a", label:"a — Alt. meteorizada",   r89:3,r76:3},
-  {code:"c", label:"c — Comp. meteorizada",  r89:2,r76:2},
-  {code:"s", label:"s — Suelo residual",     r89:1,r76:1},
-  // {code:"-1",label:"-1 — Sin información",   r89:0,r76:0},
-];
-const TIPO_EST=[
-  {code:"JN",desc:"Junta"},{code:"BED",desc:"Estrato"},{code:"F",desc:"Falla"},
-  {code:"SZ",desc:"Cizalla"},{code:"CON",desc:"Contacto"},
-];
-const FORMA_EST=[
-  {code:"P",desc:"Plana"},{code:"C",desc:"Curva"},{code:"O",desc:"Ondulada"},
-  {code:"E",desc:"Escalonada"},{code:"I",desc:"Irregular"},
-];
+  <script>
+    // ═══════════════════════════════════════════════════════
+    // CATÁLOGOS
+    // ═══════════════════════════════════════════════════════
+    const ABERTURA = [
+      { label: "Masiva", code: "0", mm: "0", r89: 6, r76: 5 },
+      { label: "Entre Abierta", code: "0.000001", mm: "<0.1", r89: 5, r76: 4 },
+      { label: "Abierta", code: "0.1", mm: "0.1–1", r89: 3, r76: 3 },
+      { label: "Muy Abierta", code: "1", mm: "1–5", r89: 1, r76: 1 },
+      { label: "Ext. Abierta", code: "5", mm: ">5", r89: 0, r76: 0 },
+    ];
+    const CONTINUIDAD = [
+      { label: "<1 m", code: "0", r89: 6, r76: 5 },
+      { label: "1–3 m", code: "1", r89: 4, r76: 4 },
+      { label: "3–10 m", code: "3", r89: 2, r76: 3 },
+      { label: "10–20 m", code: "10", r89: 1, r76: 1 },
+      { label: ">20 m", code: "20", r89: 0, r76: 0 },
+    ];
+    const ESPESOR = [{ label: "<5 mm", code: "1" }, { label: ">5 mm", code: "2" }];
+    const RELLENO = [
+      { code: "cwf", tipo: 3, sin89: 6, sin76: 5 },
+      { code: "si", tipo: 1, dlt5_89: 4, dlt5_76: 4, dgt5_89: 2, dgt5_76: 3 },
+      { code: "sf", tipo: 1, dlt5_89: 4, dlt5_76: 4, dgt5_89: 2, dgt5_76: 3 },
+      { code: "ep", tipo: 1, dlt5_89: 4, dlt5_76: 4, dgt5_89: 2, dgt5_76: 3 },
+      { code: "ox", tipo: 1, dlt5_89: 4, dlt5_76: 4, dgt5_89: 2, dgt5_76: 3 },
+      { code: "g", tipo: 2, blt5_89: 2, blt5_76: 2, bgt5_89: 0, bgt5_76: 0 },
+      { code: "cl", tipo: 2, blt5_89: 2, blt5_76: 2, bgt5_89: 0, bgt5_76: 0 },
+      { code: "ca", tipo: 2, blt5_89: 2, blt5_76: 2, bgt5_89: 0, bgt5_76: 0 },
+    ];
+    const RUGOSIDAD = { "1": [6, 5], "2": [5, 4], "3": [5, 4], "4": [3, 2], "5": [3, 2], "6": [1, 0], "7": [1, 0], "8": [0, 0], "9": [0, 0] };
+    const ALTERACION = [
+      { code: "f", label: "f — Fresca", r89: 6, r76: 5 },
+      { code: "d", label: "d — Déb. meteorizada", r89: 5, r76: 5 },
+      { code: "m", label: "m — Mod. meteorizada", r89: 3, r76: 4 },
+      { code: "a", label: "a — Alt. meteorizada", r89: 3, r76: 3 },
+      { code: "c", label: "c — Comp. meteorizada", r89: 2, r76: 2 },
+      { code: "s", label: "s — Suelo residual", r89: 1, r76: 1 },
+      // {code:"-1",label:"-1 — Sin información",   r89:0,r76:0},
+    ];
+    const TIPO_EST = [
+      { code: "JN", desc: "Junta" }, { code: "BED", desc: "Estrato" }, { code: "F", desc: "Falla" },
+      { code: "SZ", desc: "Cizalla" }, { code: "CON", desc: "Contacto" },
+    ];
+    const FORMA_EST = [
+      { code: "P", desc: "Plana" }, { code: "C", desc: "Curva" }, { code: "O", desc: "Ondulada" },
+      { code: "E", desc: "Escalonada" }, { code: "I", desc: "Irregular" },
+    ];
 
-const EST_EXTRE=[
-  {code:"0",desc:"No se ven"},{code:"1",desc:"Solo vemos uno"},{code:"2",desc:"Se ven en dos extremos visibles"},
-  {code:"3",desc:"Terminacion entre estructuras"},
-];
-// ═══════════════════════════════════════════════════════
-// CLASIFICACIÓN LITOLÓGICA
-// ═══════════════════════════════════════════════════════
-const CLASIFICACION_LITOLOGICA = [
-  // Rocas Intrusivas
-  {grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_EQ"},
-  {grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_P"},
-  {grupo: "INTRUSIVOS", unidad: "MBF1", litologia: "MBF", codigo: "MBF1"},
-  {grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF2"},
-  {grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF_P"},
-  {grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_F"},
-  {grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_M"},
-  {grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_1"},
-  {grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_2"},
-  {grupo: "INTRUSIVOS", unidad: "MZD", litologia: "MZD", codigo: "MZD"},
-  {grupo: "INTRUSIVOS", unidad: "MZQ", litologia: "MZQ", codigo: "MZQ"},
-  {grupo: "INTRUSIVOS", unidad: "AN", litologia: "LAM", codigo: "LAM"},
-  
-  // Rocas Sedimentarias
-  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_M"},
-  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_Mg"},
-  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_S"},
-  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_C"},
-  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_U"},
-  {grupo: "SEDIMENTARIOS", unidad: "SHL", litologia: "HFL", codigo: "SHL_MA"},
-  
-  // Rocas Metamórficas
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "GSK", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "PSK", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MSK", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "ESK", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBC", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBL", codigo: "Varios"},
-  {grupo: "METAMORFICAS", unidad: "SHL", litologia: "HFL", codigo: "-"},
-  {grupo: "METAMORFICAS", unidad: "SND", litologia: "QZT", codigo: "-"},
-  
-  // Brechas
-  {grupo: "BRECHAS", unidad: "TBX", litologia: "TBX", codigo: "TBX"},
-  {grupo: "BRECHAS", unidad: "HBX", litologia: "HBX", codigo: "HBX"},
-  {grupo: "BRECHAS", unidad: "MBX / varios", litologia: "MBX", codigo: "MBX"},
-  
-  // Endoskarn
-  {grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EPG", codigo: "-"},
-  {grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EGT", codigo: "-"}
-];
+    const EST_EXTRE = [
+      { code: "0", desc: "No se ven" }, { code: "1", desc: "Solo vemos uno" }, { code: "2", desc: "Se ven en dos extremos visibles" },
+      { code: "3", desc: "Terminacion entre estructuras" },
+    ];
+    // ═══════════════════════════════════════════════════════
+    // CLASIFICACIÓN LITOLÓGICA
+    // ═══════════════════════════════════════════════════════
+    const CLASIFICACION_LITOLOGICA = [
+      // Rocas Intrusivas
+      { grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_EQ" },
+      { grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_P" },
+      { grupo: "INTRUSIVOS", unidad: "MBF1", litologia: "MBF", codigo: "MBF1" },
+      { grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF2" },
+      { grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF_P" },
+      { grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_F" },
+      { grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_M" },
+      { grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_1" },
+      { grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_2" },
+      { grupo: "INTRUSIVOS", unidad: "MZD", litologia: "MZD", codigo: "MZD" },
+      { grupo: "INTRUSIVOS", unidad: "MZQ", litologia: "MZQ", codigo: "MZQ" },
+      { grupo: "INTRUSIVOS", unidad: "AN", litologia: "LAM", codigo: "LAM" },
 
-// ═══════════════════════════════════════════════════════
-// CÁLCULOS
-// ═══════════════════════════════════════════════════════
-function getRelleno(code,espesor){
-  const r=RELLENO.find(x=>x.code===code);
-  if(!r)return[null,null];
-  if(r.tipo===3)return[r.sin89,r.sin76];
-  const esp=parseDecimalInput(espesor);
-  if(isNaN(esp))return[null,null];
-  const esMenorA5=esp<5;
-  if(r.tipo===1){
-    return esMenorA5?[r.dlt5_89,r.dlt5_76]:[r.dgt5_89,r.dgt5_76];
-  }
-  if(r.tipo===2){
-    return esMenorA5?[r.blt5_89,r.blt5_76]:[r.bgt5_89,r.bgt5_76];
-  }
-  return[null,null];
-}
-function cleanDecimalInput(val){
-  const raw=String(val??"").replace(/\./g,",").replace(/[^\d,]/g,"");
-  const parts=raw.split(",");
-  const enteros=(parts[0]||"").slice(0,2);
-  const decimales=(parts[1]||"").slice(0,2);
-  return raw.includes(",")?`${enteros},${decimales}`:enteros;
-}
-function parseDecimalInput(val){
-  if(val===null||val===undefined||val==="")return NaN;
-  const n=Number(String(val).replace(",","."));
-  return Number.isFinite(n)?n:NaN;
-}
-function clampDecimalInput(val,min,max){
-  const limpio=cleanDecimalInput(val);
-  if(limpio==="")return "";
-  const n=parseDecimalInput(limpio);
-  if(isNaN(n))return "";
-  const bounded=Math.min(max,Math.max(min,n));
-  return bounded.toFixed(2).replace(".",",");
-}
-function updateDecimalInput(el,id,key){
-  const limpio=cleanDecimalInput(el.value);
-  el.value=limpio;
-  const r=rows.find(x=>x.id===id);
-  if(r){
-    r[key]=limpio;
-    saveRows();
-  }
-}
-function commitDecimalInput(id,key,val){
-  updRow(id,key,cleanDecimalInput(val));
-}
-function updateBoundedDecimalInput(el,id,key,min,max){
-  const limpio=cleanDecimalInput(el.value);
-  el.value=limpio;
-  const r=rows.find(x=>x.id===id);
-  if(r){
-    r[key]=limpio;
-    saveRows();
-  }
-}
-function commitBoundedDecimalInput(id,key,val,min,max){
-  updRow(id,key,clampDecimalInput(val,min,max));
-}
-function cleanIntegerInput(val,min,max){
-  const soloDigitos=String(val??"").replace(/\D/g,"");
-  if(soloDigitos==="")return "";
-  const n=Math.min(max,Math.max(min,parseInt(soloDigitos,10)));
-  return String(n);
-}
-function updateIntegerInput(el,id,key,min,max){
-  const limpio=cleanIntegerInput(el.value,min,max);
-  el.value=limpio;
-  const r=rows.find(x=>x.id===id);
-  if(r){
-    r[key]=limpio;
-    saveRows();
-  }
-}
-function commitIntegerInput(id,key,val,min,max){
-  updRow(id,key,cleanIntegerInput(val,min,max));
-}
-function setExtreSelectMode(el,expanded){
-  if(!el)return;
-  [...el.options].forEach(opt=>{
-    const item=EST_EXTRE.find(x=>x.code===opt.value);
-    if(item)opt.textContent=expanded?`${item.code}. ${item.desc}`:item.code;
-  });
-}
-function firstOptValue(opts){
-  if(!opts||!opts.length)return "";
-  const first=opts[0];
-  return typeof first==="string"?first:first.code;
-}
-function ensureSelectDefaults(row){
-  if(!row.tipo)row.tipo=firstOptValue(TIPO_EST);
-  if(!row.next)row.next=firstOptValue(EST_EXTRE);
-  if(!row.r1)row.r1=firstOptValue(RELLENO);
-  if(!row.r2)row.r2=firstOptValue(RELLENO);
-  if(!row.rug)row.rug=Object.keys(RUGOSIDAD)[0]||"";
-  if(!row.forma)row.forma=firstOptValue(FORMA_EST);
-  if(!row.alt)row.alt=firstOptValue(ALTERACION);
-  return row;
-}
-function getAberturaCode(val){
-  const n=parseDecimalInput(val);
-  if(isNaN(n))return "";
-  if(n===0)return "0";
-  if(n<0.1)return "0.000001";
-  if(n<1)return "0.1";
-  if(n<=5)return "1";
-  return "5";
-}
-function getContinuidadCode(val){
-  const n=parseDecimalInput(val);
-  if(isNaN(n))return "";
-  if(n<1)return "0";
-  if(n<3)return "1";
-  if(n<10)return "3";
-  if(n<=20)return "10";
-  return "20";
-}
-function calcRow(row){
-  const alt=ALTERACION.find(x=>x.code===row.alt);
-  const a89=alt?alt.r89:null, a76=alt?alt.r76:null;
-  const[r1_89,r1_76]=getRelleno(row.r1,row.esp);
-  const[r2_89,r2_76]=getRelleno(row.r2,row.esp);
-  let rel89=null,rel76=null;
-  if(r1_89!==null&&r2_89!==null){rel89=Math.min(r1_89,r2_89);rel76=Math.min(r1_76,r2_76);}
-  else if(r1_89!==null){rel89=r1_89;rel76=r1_76;}
-  else if(r2_89!==null){rel89=r2_89;rel76=r2_76;}
-  const c=CONTINUIDAD.find(x=>x.code===getContinuidadCode(row.cont));
-  const co89=c?c.r89:null,co76=c?c.r76:null;
-  const ab=ABERTURA.find(x=>x.code===getAberturaCode(row.aber));
-  const ab89=ab?ab.r89:null,ab76=ab?ab.r76:null;
-  const rp=RUGOSIDAD[row.rug];
-  const rug89=rp?rp[0]:null,rug76=rp?rp[1]:null;
-  const vs89=[a89,rel89,co89,ab89,rug89];
-  const vs76=[a76,rel76,co76,ab76,rug76];
-  const v89=vs89.every(v=>v!==null)?vs89.reduce((a,b)=>a+b,0):null;
-  const v76=vs76.every(v=>v!==null)?vs76.reduce((a,b)=>a+b,0):null;
-  return{a89,a76,rel89,rel76,co89,co76,ab89,ab76,rug89,rug76,v89,v76,r1_89,r1_76,r2_89,r2_76};
-}
-function calcSummary(){
-  const fams=[...new Set(rows.map(r=>r.fam))].sort();
-  let jv=0;
-  const fs=fams.map(f=>{
-    const fr=rows.filter(r=>r.fam===f);
-    const v89=fr.map(r=>calcRow(r).v89).filter(v=>v!==null);
-    const v76=fr.map(r=>calcRow(r).v76).filter(v=>v!==null);
-    const sps=fr.map(r=>parseDecimalInput(r.espac)).filter(v=>!isNaN(v)&&v>0);
-    if(sps.length){const ms=sps.reduce((a,b)=>a+b,0)/sps.length;jv+=1/ms;}
-    return{fam:f,n:fr.length,a89:v89.length?v89.reduce((a,b)=>a+b,0)/v89.length:null,a76:v76.length?v76.reduce((a,b)=>a+b,0)/v76.length:null};
-  });
-  
-  // Calcular promedios basados en espaciamiento por familia
-  const fam1 = rows.filter(r=>r.fam==="1");
-  const fam2 = rows.filter(r=>r.fam==="2"); 
-  const fam3 = rows.filter(r=>r.fam==="3");
-  
-  const getEspaciamientoPromedio = (familia) => {
-    const espaciamientos = familia.map(r=>parseDecimalInput(r.espac)).filter(v=>!isNaN(v)&&v>0);
-    return espaciamientos.length ? espaciamientos.reduce((a,b)=>a+b,0)/espaciamientos.length : null;
-  };
-  
-  const getRmrPromedio = (familia) => {
-    const v89 = familia.map(r=>calcRow(r).v89).filter(v=>v!==null);
-    return v89.length ? v89.reduce((a,b)=>a+b,0)/v89.length : null;
-  };
-  
-  // Calcular promedios de espaciamiento
-  const prom1 = getEspaciamientoPromedio(fam1);
-  const prom2 = getEspaciamientoPromedio(fam2);
-  const prom3 = getEspaciamientoPromedio(fam3);
-  
-  // Calcular JV usando suma de inversos: (1/prom1 + 1/prom2 + 1/prom3)
-  let jvCalculado = 0;
-  const promediosValidos = [prom1, prom2, prom3].filter(p => p !== null && p > 0);
-  if(promediosValidos.length > 0){
-    const sumaInversos = promediosValidos.reduce((sum, p) => sum + (1/p), 0);
-    jvCalculado = sumaInversos;
-  }
-  
-  return{
-    p1_89: prom1,  // Promedio espaciamiento familia 1
-    p1_76: null,
-    p2_89: prom2,  // Promedio espaciamiento familia 2  
-    p2_76: null,
-    p3_89: prom3, // Promedio espaciamiento familia 3
-    p3_76: null,
-    jv: jvCalculado, // JV calculado con promedio inverso
-    fs
-  };
-}
+      // Rocas Sedimentarias
+      { grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_M" },
+      { grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_Mg" },
+      { grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_S" },
+      { grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_C" },
+      { grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_U" },
+      { grupo: "SEDIMENTARIOS", unidad: "SHL", litologia: "HFL", codigo: "SHL_MA" },
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let _uid=0;
-const uid=()=>`r${Date.now()}_${++_uid}`;
-const emptyRow=(fam="1")=>({id:uid(),fam,dist:"",dip:"",dipdir:"",tipo:"JN",nstr:"1",
-  aber:"",esp:"",cont:"",espac:"",next:"",term:"",r1:"",r2:"",jrc:"",rug:"",forma:"",alt:""});
+      // Rocas Metamórficas
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "GSK", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "PSK", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "MSK", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "ESK", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBC", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBL", codigo: "Varios" },
+      { grupo: "METAMORFICAS", unidad: "SHL", litologia: "HFL", codigo: "-" },
+      { grupo: "METAMORFICAS", unidad: "SND", litologia: "QZT", codigo: "-" },
 
-let rows=[];
-try{const s=localStorage.getItem("mw_rows");rows=s?JSON.parse(s):[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
-catch{rows=[emptyRow("1"),emptyRow("1"),emptyRow("2")];}
-rows=rows.map(ensureSelectDefaults);
+      // Brechas
+      { grupo: "BRECHAS", unidad: "TBX", litologia: "TBX", codigo: "TBX" },
+      { grupo: "BRECHAS", unidad: "HBX", litologia: "HBX", codigo: "HBX" },
+      { grupo: "BRECHAS", unidad: "MBX / varios", litologia: "MBX", codigo: "MBX" },
 
-function saveRows(){try{localStorage.setItem("mw_rows",JSON.stringify(rows));}catch{}}
-function saveHdr(){
-  const h=getHdr();
-  try{localStorage.setItem("mw_hdr",JSON.stringify(h));}catch{}
-  const badge=document.getElementById("td2-badge");
-  if(h.td2){badge.textContent=h.td2;badge.style.display="";}else badge.style.display="none";
-  document.getElementById("tbl-lbl").textContent=`⛏ Registro de Discontinuidades  ·  ${rows.length} fila${rows.length!==1?"s":""}  ·  Largo máx: ${h.largo||"—"} m`;
-}
-function getHdr(){
-  return{
-    td2:v("h_td2"),iniX:v("h_iniX"),iniY:v("h_iniY"),iniC:v("h_iniC"),
-    finX:v("h_finX"),finY:v("h_finY"),finC:v("h_finC"),largo:v("h_largo"),
-    altura:v("h_altura"),dipT:v("h_dipT"),dipdirT:v("h_dipdirT"),
-    dipH:v("h_dipH"),azH:v("h_azH"),lito1:v("h_lito1"),lito2:v("h_lito2"),lito3:v("h_lito3"),lmtM:v("h_lmtM"),
-    sector:v("h_sector"),fase:v("h_fase"),nivel:v("h_nivel"),
-    sectG:v("h_sectG"),intemp:v("h_intemp"),altZona:v("h_altZona"),fecha:v("h_fecha"),mapeador:v("h_mapeador"),
-  };
-}
-function v(id){const e=document.getElementById(id);return e?e.value:"";}
-function sv(id,val){const e=document.getElementById(id);if(e)e.value=val||"";}
-function loadHdrToForm(){
-  try{
-    const s=localStorage.getItem("mw_hdr");if(!s)return;
-    const h=JSON.parse(s);
-    Object.entries(h).forEach(([k,val])=>sv("h_"+k,val));
-  }catch{}
-}
+      // Endoskarn
+      { grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EPG", codigo: "-" },
+      { grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EGT", codigo: "-" }
+    ];
 
-function onHdr(){saveHdr();renderSummary();}
-
-// ═══════════════════════════════════════════════════════
-// FUNCIONES DE VALIDACIÓN
-// ═══════════════════════════════════════════════════════
-function validarGrados(input, min, max) {
-  let valor = parseFloat(input.value);
-  
-  if (isNaN(valor)) {
-    input.value = '';
-    return;
-  }
-  
-  // Corregir valor si está fuera de rango
-  if (valor < min) {
-    valor = min;
-    input.value = valor;
-  } else if (valor > max) {
-    valor = max;
-    input.value = valor;
-  }
-  
-  // Para Dip-Dir Talud°, si es 360, cambiar a 0
-  if (max === 360 && valor === 360) {
-    input.value = 0;
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// FUNCIONES LITOLÓGICAS
-// ═══════════════════════════════════════════════════════
-function populateLito1Dropdown() {
-  const select = document.getElementById('h_lito1');
-  const unidades = [...new Set(CLASIFICACION_LITOLOGICA.map(item => item.unidad))].sort();
-  
-  unidades.forEach(unidad => {
-    const option = document.createElement('option');
-    option.value = unidad;
-    option.textContent = unidad;
-    select.appendChild(option);
-  });
-}
-
-function onLito1Change() {
-  const unidadSeleccionada = document.getElementById('h_lito1').value;
-  const litologiaInput = document.getElementById('h_lito2');
-  const codigoInput = document.getElementById('h_lito3');
-  const grupoInput = document.getElementById('h_lmtM');
-  
-  if (!unidadSeleccionada) {
-    litologiaInput.value = '';
-    codigoInput.value = '';
-    grupoInput.value = '';
-    onHdr();
-    return;
-  }
-  
-  // Buscar todas las entradas que coincidan con la unidad seleccionada
-  const entradas = CLASIFICACION_LITOLOGICA.filter(item => item.unidad === unidadSeleccionada);
-  
-  if (entradas.length > 0) {
-    // Tomar la primera entrada para autocompletar
-    const entrada = entradas[0];
-    litologiaInput.value = entrada.litologia;
-    codigoInput.value = entrada.codigo;
-    grupoInput.value = entrada.grupo;
-    
-    // Si hay múltiples entradas con la misma unidad pero diferentes litologías/códigos
-    // podemos mostrar un mensaje o permitir selección adicional
-    if (entradas.length > 1) {
-      console.log(`Múltiples opciones para ${unidadSeleccionada}:`, entradas);
+    // ═══════════════════════════════════════════════════════
+    // CÁLCULOS
+    // ═══════════════════════════════════════════════════════
+    function getRelleno(code, espesor) {
+      const r = RELLENO.find(x => x.code === code);
+      if (!r) return [null, null];
+      if (r.tipo === 3) return [r.sin89, r.sin76];
+      const esp = parseDecimalInput(espesor);
+      if (isNaN(esp)) return [null, null];
+      const esMenorA5 = esp < 5;
+      if (r.tipo === 1) {
+        return esMenorA5 ? [r.dlt5_89, r.dlt5_76] : [r.dgt5_89, r.dgt5_76];
+      }
+      if (r.tipo === 2) {
+        return esMenorA5 ? [r.blt5_89, r.blt5_76] : [r.bgt5_89, r.bgt5_76];
+      }
+      return [null, null];
     }
-  }
-  
-  onHdr();
-}
-
-// ═══════════════════════════════════════════════════════
-// TABLE RENDER
-// ═══════════════════════════════════════════════════════
-const FAM_BG=["#1e293b","#1e2d3b","#1e313b","#1e333b","#1e353b","#1e373b","#1e393b","#1e3b3b","#1e3d3b"];
-function selOpts(opts,val,emptyLabel="—"){
-  let s=`<option value="">${emptyLabel}</option>`;
-  opts.forEach(o=>{
-    const code=typeof o==="string"?o:o.code;
-    const lbl=typeof o==="string"?o:(o.label||o.desc||o.code);
-    s+=`<option value="${code}"${current===code?" selected":""}>${lbl}</option>`;
-  });
-  return s;
-}
-function makeRow(row,idx){
-  const rt=calcRow(row);
-  const bg=FAM_BG[(parseInt(row.fam)||1)-1];
-  const largoMax=parseDecimalInput(v("h_largo"))||999;
-  const distErr=row.dist!==""&&parseDecimalInput(row.dist)>largoMax;
-  const d=(val,cls="")=>val!==null&&val!==undefined?`<td class="${cls}">${val}</td>`:`<td class="${cls}" style="color:var(--mu)">—</td>`;
-  return `<tr id="tr_${row.id}" style="background:${bg};transition:background 0.2s;">
-    <td style="position:sticky;left:0;background:${bg};z-index:5;border-right:2px solid var(--bd);">
-      <input class="ti" value="${row.fam}" type="text" inputmode="numeric" maxlength="1" style="width:36px;color:var(--am);font-weight:800;background:rgba(245,158,11,0.05);border-radius:4px;" oninput="updateIntegerInput(this,'${row.id}','fam',1,9)" onchange="commitIntegerInput('${row.id}','fam',this.value,1,9)"/>
-    </td>
-    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="text" inputmode="decimal" maxlength="5" placeholder="0.00" style="width:50px" title="${distErr?`Excede ${largoMax}m`:""}" oninput="updateDecimalInput(this,'${row.id}','dist')" onchange="commitDecimalInput('${row.id}','dist',this.value)"/></td>
-    <td><input class="ti" value="${row.dip}" type="text" inputmode="numeric" maxlength="2" style="width:40px" oninput="updateIntegerInput(this,'${row.id}','dip',0,90)" onchange="commitIntegerInput('${row.id}','dip',this.value,0,90)"/></td>
-    <td><input class="ti" value="${row.dipdir}" type="text" inputmode="numeric" maxlength="3" style="width:45px" oninput="updateIntegerInput(this,'${row.id}','dipdir',0,360)" onchange="commitIntegerInput('${row.id}','dipdir',this.value,0,360)"/></td>
-    <td><select class="ts" style="width:55px;" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t=>({code:t.code,label:t.code})),row.tipo)}</select></td> 
-    <td><input class="ti" value="${row.nstr}" type="text" inputmode="numeric" maxlength="2" style="width:36px" oninput="updateIntegerInput(this,'${row.id}','nstr',1,20)" onchange="commitIntegerInput('${row.id}','nstr',this.value,1,20)"/></td>
-    <td><input class="ti" value="${row.aber}" type="text" inputmode="decimal" maxlength="5" placeholder="0.00" style="width:70px" oninput="updateDecimalInput(this,'${row.id}','aber')" onchange="commitDecimalInput('${row.id}','aber',this.value)"/></td>
-    <td><input class="ti" value="${row.esp}" type="text" inputmode="decimal" maxlength="5" placeholder="0.00" style="width:64px" oninput="updateDecimalInput(this,'${row.id}','esp')" onchange="commitDecimalInput('${row.id}','esp',this.value)"/></td>
-    <td><input class="ti" value="${row.cont}" type="text" inputmode="decimal" maxlength="5" placeholder="0.00" style="width:76px" oninput="updateDecimalInput(this,'${row.id}','cont')" onchange="commitDecimalInput('${row.id}','cont',this.value)"/></td>
-    <td><input class="ti" value="${row.espac}" type="text" inputmode="decimal" maxlength="5" placeholder="0.00" style="width:50px" oninput="updateDecimalInput(this,'${row.id}','espac')" onchange="commitDecimalInput('${row.id}','espac',this.value)"/></td>
-    <td><select class="ts" style="width:40px" onfocus="setExtreSelectMode(this,true)" onmousedown="setExtreSelectMode(this,true)" onchange="updRow('${row.id}','next',this.value);setExtreSelectMode(this,false)" onblur="setExtreSelectMode(this,false)">${selOpts(EST_EXTRE.map(e=>({code:e.code,label:e.code})),row.next)}</select></td>
-    <td><input class="ti" value="${row.term}" type="text" inputmode="numeric" maxlength="1" style="width:40px" oninput="updateIntegerInput(this,'${row.id}','term',0,5)" onchange="commitIntegerInput('${row.id}','term',this.value,0,5)"/></td>
-    <td><select class="ts" style="width:60px" onchange="updRow('${row.id}','r1',this.value)">${selOpts(RELLENO.map(r=>r.code),row.r1)}</select></td>
-    <td><select class="ts" style="width:60px" onchange="updRow('${row.id}','r2',this.value)">${selOpts(RELLENO.map(r=>({code:r.code,label:r.code})),row.r2)}</select></td>
-    <td style="color:#fde68a;font-size:10px;min-width:32px;font-family:monospace;background:rgba(255,255,255,0.02);">${rt.r1_89!==null?rt.r1_89:"—"}</td>
-    <td style="color:#fde68a;font-size:10px;min-width:32px;font-family:monospace;background:rgba(255,255,255,0.02);">${rt.r2_89!==null?rt.r2_89:"—"}</td>
-    <td style="color:var(--pk);font-size:10px;min-width:32px;font-family:monospace;background:rgba(255,255,255,0.02);">${rt.r1_76!==null?rt.r1_76:"—"}</td>
-    <td style="color:var(--pk);font-size:10px;min-width:32px;font-family:monospace;background:rgba(255,255,255,0.02);">${rt.r2_76!==null?rt.r2_76:"—"}</td>
-    <td><input class="ti" value="${row.jrc}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','jrc',0,20)" onchange="commitIntegerInput('${row.id}','jrc',this.value,0,20)"/></td>
-    <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','rug',this.value)"><option value="">—</option>${Object.keys(RUGOSIDAD).map(k=>`<option value="${k}"${row.rug===k?" selected":""}>${k}</option>`).join("")}</select></td>
-    <td><select class="ts" style="width:50px" onchange="updRow('${row.id}','forma',this.value)">${selOpts(FORMA_EST.map(f=>({code:f.code,label:f.code})),row.forma)}</select></td>
-    <td><select class="ts" style="width:50px" onchange="updRow('${row.id}','alt',this.value)">${selOpts(ALTERACION.map(a=>({code:a.code,label:a.code})),row.alt)}</select></td>
-    ${d(rt.a89,"td89")}${d(rt.rel89,"td89")}${d(rt.co89,"td89")}${d(rt.ab89,"td89")}${d(rt.rug89,"td89")}${d(rt.v89,"td89v")}
-    ${d(rt.a76,"td76")}${d(rt.rel76,"td76")}${d(rt.co76,"td76")}${d(rt.ab76,"td76")}${d(rt.rug76,"td76")}${d(rt.v76,"td76v")}
-    <td><button class="del-btn" onclick="delRow('${row.id}')">×</button></td>
-  </tr>`;
-}
-
-function renderTable(){
-  // Ordenar filas por ID de familia para mantener agrupamiento
-  const sortedRows = [...rows].sort((a, b) => {
-    // Familia 1 primero, luego familia 2, luego familia 3, luego el resto ordenado
-    if(a.fam === "1" && b.fam !== "1") return -1;
-    if(a.fam !== "1" && b.fam === "1") return 1;
-    if(a.fam === "2" && b.fam !== "2" && b.fam !== "1") return -1;
-    if(a.fam !== "2" && a.fam !== "1" && b.fam === "2") return 1;
-    if(a.fam === "3" && b.fam !== "3" && b.fam !== "1" && b.fam !== "2") return -1;
-    if(a.fam !== "3" && a.fam !== "1" && a.fam !== "2" && b.fam === "3") return 1;
-    return parseInt(a.fam) - parseInt(b.fam);
-  });
-  
-  document.getElementById("tbl-body").innerHTML=sortedRows.map(makeRow).join("");
-  saveHdr();
-}
-function renderSummary(){
-  const s=calcSummary();
-  const fmt=v=>v!==null?v.toFixed(3):"—";
-  let html=`<div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
-    <div style="flex: 1; min-width: 250px;">
-      <div style="font-size:11px;color:var(--mu);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-        <span style="background:var(--am);width:4px;height:12px;border-radius:2px;"></span>
-        PROMEDIOS DE ESPACIAMIENTO (m)
-      </div>
-      <div style="background:rgba(0,0,0,0.15);padding:12px;border-radius:10px;border:1px solid var(--bd);">
-        ${[["Familia 1:",s.p1_89],["Familia 2:",s.p2_89],["Familia 3:",s.p3_89]].map(([lbl,val])=>`
-        <div class="stat-row">
-          <span class="stat-lbl">${lbl}</span>
-          <span class="stat-v" style="background:var(--bg3);color:var(--tx);min-width:80px;text-align:right;">${fmt(val)}</span>
-        </div>`).join("")}
-      </div>
-    </div>
-    
-    <div style="flex: 1; min-width: 200px;">
-      <div style="font-size:11px;color:var(--mu);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-        <span style="background:var(--or);width:4px;height:12px;border-radius:2px;"></span>
-        ÍNDICE VOLUMÉTRICO
-      </div>
-      <div style="background:rgba(0,0,0,0.15);padding:16px;border-radius:10px;border:1px solid var(--bd);height:calc(100% - 28px);display:flex;flex-direction:column;justify-content:center;align-items:center;">
-        <div style="color:var(--mu);font-size:12px;margin-bottom:8px;font-weight:600;">JV (jts/m³)</div>
-        <div class="stat-v sv-am" style="font-size:24px;padding:8px 24px;">${s.jv>0?s.jv.toFixed(3):"—"}</div>
-        <div style="font-size:10px;color:var(--mu);margin-top:8px;text-align:center;">Suma de inversos de los promedios</div>
-      </div>
-    </div>`;
-
-  if(s.fs.length){
-    html+=`<div style="flex: 1.5; min-width: 300px;">
-      <div style="font-size:11px;color:var(--mu);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-        <span style="background:var(--pk);width:4px;height:12px;border-radius:2px;"></span>
-        RMR PROMEDIO POR FAMILIA
-      </div>
-      <div class="tbl-wrap" style="background:rgba(0,0,0,0.15);">
-        <table style="font-size:11px;">
-          <thead>
-            <tr>
-              <th style="text-align:left;color:var(--mu);">FAM</th>
-              <th style="color:var(--mu);">N°</th>
-              <th style="color:var(--or);background:rgba(251,146,60,0.05);">AVG RMR'89</th>
-              <th style="color:var(--pk);background:rgba(244,114,182,0.05);">AVG RMR'76</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${s.fs.map(f=>`<tr>
-              <td style="color:var(--am);font-weight:800;font-size:13px;">${f.fam}</td>
-              <td style="color:var(--tx);font-weight:600;">${f.n}</td>
-              <td style="color:var(--or);font-family:monospace;font-weight:700;background:rgba(251,146,60,0.02);">${f.a89!==null?f.a89.toFixed(1):"—"}</td>
-              <td style="color:var(--pk);font-family:monospace;font-weight:700;background:rgba(244,114,182,0.02);">${f.a76!==null?f.a76.toFixed(1):"—"}</td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-  }
-  html+="</div>";
-  document.getElementById("summary-card").innerHTML=html;
-}
-
-function updRow(id,k,val){
-  const r=rows.find(x=>x.id===id);
-  if(!r) return;
-  
-  // Si está actualizando el campo familia y está vacío, verificar límites
-  if(k === "fam" && val !== ""){
-    // Verificar límite para familias 1, 2 y 3
-    if(val === "1" || val === "2" || val === "3"){
-      const countFam = rows.filter(r => r.fam === val && r.id !== id).length;
-      if(countFam >= 3){
-        alert(`Máximo 3 filas permitidas para familia ${val}`);
-        return;
+    function cleanDecimalInput(val) {
+      const raw = String(val ?? "").replace(/\./g, ",").replace(/[^\d,]/g, "");
+      const parts = raw.split(",");
+      const enteros = (parts[0] || "").slice(0, 2);
+      const decimales = (parts[1] || "").slice(0, 2);
+      return raw.includes(",") ? `${enteros},${decimales}` : enteros;
+    }
+    function parseDecimalInput(val) {
+      if (val === null || val === undefined || val === "") return NaN;
+      const n = Number(String(val).replace(",", "."));
+      return Number.isFinite(n) ? n : NaN;
+    }
+    function clampDecimalInput(val, min, max) {
+      const limpio = cleanDecimalInput(val);
+      if (limpio === "") return "";
+      const n = parseDecimalInput(limpio);
+      if (isNaN(n)) return "";
+      const bounded = Math.min(max, Math.max(min, n));
+      return bounded.toFixed(2).replace(".", ",");
+    }
+    function updateDecimalInput(el, id, key) {
+      const limpio = cleanDecimalInput(el.value);
+      el.value = limpio;
+      const r = rows.find(x => x.id === id);
+      if (r) {
+        r[key] = limpio;
+        saveRows();
       }
     }
-  }
-  
-  // Si el ID Fam está vacío y no es el campo familia, no permitir actualización
-  if(r.fam === "" && k !== "fam"){
-    alert("Debe ingresar un ID de Familia primero");
-    return;
-  }
-  
-  r[k]=val;
-  saveRows();
-  renderTable();
-  renderSummary();
-}
-function getControlFam(){
-  const el=document.getElementById("fam-control");
-  return el&&el.value?el.value:"1";
-}
-function addRowFromControl(){addRow(getControlFam());}
+    function commitDecimalInput(id, key, val) {
+      updRow(id, key, cleanDecimalInput(val));
+    }
+    function updateBoundedDecimalInput(el, id, key, min, max) {
+      const limpio = cleanDecimalInput(el.value);
+      el.value = limpio;
+      const r = rows.find(x => x.id === id);
+      if (r) {
+        r[key] = limpio;
+        saveRows();
+      }
+    }
+    function commitBoundedDecimalInput(id, key, val, min, max) {
+      updRow(id, key, clampDecimalInput(val, min, max));
+    }
+    function cleanIntegerInput(val, min, max) {
+      const soloDigitos = String(val ?? "").replace(/\D/g, "");
+      if (soloDigitos === "") return "";
+      const n = Math.min(max, Math.max(min, parseInt(soloDigitos, 10)));
+      return String(n);
+    }
+    function updateIntegerInput(el, id, key, min, max) {
+      const limpio = cleanIntegerInput(el.value, min, max);
+      el.value = limpio;
+      const r = rows.find(x => x.id === id);
+      if (r) {
+        r[key] = limpio;
+        saveRows();
+      }
+    }
+    function commitIntegerInput(id, key, val, min, max) {
+      updRow(id, key, cleanIntegerInput(val, min, max));
+    }
+    function setExtreSelectMode(el, expanded) {
+      if (!el) return;
+      [...el.options].forEach(opt => {
+        const item = EST_EXTRE.find(x => x.code === opt.value);
+        if (item) opt.textContent = expanded ? `${item.code}. ${item.desc}` : item.code;
+      });
+    }
+    function firstOptValue(opts) {
+      if (!opts || !opts.length) return "";
+      const first = opts[0];
+      return typeof first === "string" ? first : first.code;
+    }
+    function ensureSelectDefaults(row) {
+      if (!row.tipo) row.tipo = firstOptValue(TIPO_EST);
+      if (!row.next) row.next = firstOptValue(EST_EXTRE);
+      if (!row.r1) row.r1 = firstOptValue(RELLENO);
+      if (!row.r2) row.r2 = firstOptValue(RELLENO);
+      if (!row.rug) row.rug = Object.keys(RUGOSIDAD)[0] || "";
+      if (!row.forma) row.forma = firstOptValue(FORMA_EST);
+      if (!row.alt) row.alt = firstOptValue(ALTERACION);
+      return row;
+    }
+    function getAberturaCode(val) {
+      const n = parseDecimalInput(val);
+      if (isNaN(n)) return "";
+      if (n === 0) return "0";
+      if (n < 0.1) return "0.000001";
+      if (n < 1) return "0.1";
+      if (n <= 5) return "1";
+      return "5";
+    }
+    function getContinuidadCode(val) {
+      const n = parseDecimalInput(val);
+      if (isNaN(n)) return "";
+      if (n < 1) return "0";
+      if (n < 3) return "1";
+      if (n < 10) return "3";
+      if (n <= 20) return "10";
+      return "20";
+    }
+    function calcRow(row) {
+      const alt = ALTERACION.find(x => x.code === row.alt);
+      const a89 = alt ? alt.r89 : null, a76 = alt ? alt.r76 : null;
+      const [r1_89, r1_76] = getRelleno(row.r1, row.esp);
+      const [r2_89, r2_76] = getRelleno(row.r2, row.esp);
+      let rel89 = null, rel76 = null;
+      if (r1_89 !== null && r2_89 !== null) { rel89 = Math.min(r1_89, r2_89); rel76 = Math.min(r1_76, r2_76); }
+      else if (r1_89 !== null) { rel89 = r1_89; rel76 = r1_76; }
+      else if (r2_89 !== null) { rel89 = r2_89; rel76 = r2_76; }
+      const c = CONTINUIDAD.find(x => x.code === getContinuidadCode(row.cont));
+      const co89 = c ? c.r89 : null, co76 = c ? c.r76 : null;
+      const ab = ABERTURA.find(x => x.code === getAberturaCode(row.aber));
+      const ab89 = ab ? ab.r89 : null, ab76 = ab ? ab.r76 : null;
+      const rp = RUGOSIDAD[row.rug];
+      const rug89 = rp ? rp[0] : null, rug76 = rp ? rp[1] : null;
+      const vs89 = [a89, rel89, co89, ab89, rug89];
+      const vs76 = [a76, rel76, co76, ab76, rug76];
+      const v89 = vs89.every(v => v !== null) ? vs89.reduce((a, b) => a + b, 0) : null;
+      const v76 = vs76.every(v => v !== null) ? vs76.reduce((a, b) => a + b, 0) : null;
+      return { a89, a76, rel89, rel76, co89, co76, ab89, ab76, rug89, rug76, v89, v76, r1_89, r1_76, r2_89, r2_76 };
+    }
+    function calcSummary() {
+      const getAvgSpacing = (f) => {
+        const fr = rows.filter(r => r.fam === f);
+        const sps = fr.map(r => parseDecimalInput(r.espac)).filter(v => !isNaN(v) && v > 0);
+        return sps.length ? sps.reduce((a, b) => a + b, 0) / sps.length : null;
+      };
 
-function addRow(fam){
-  // Limitar máximo 3 filas para familias 1, 2 y 3
-  if(fam === "1" || fam === "2" || fam === "3"){
-    const countFam = rows.filter(r => r.fam === fam).length;
-    if(countFam >= 3){
-      alert(`Máximo 3 filas permitidas para familia ${fam}`);
-      return;
-    }
-  }
-  
-  // Agrupar automáticamente: insertar la fila junto a otras del mismo ID
-  const insertIndex = getInsertIndexForFamily(fam);
-  const newRow = emptyRow(fam);
-  rows.splice(insertIndex, 0, newRow);
-  
-  saveRows();
-  renderTable();
-  renderSummary();
-}
+      const prom1 = getAvgSpacing("1");
+      const prom2 = getAvgSpacing("2");
+      const prom3 = getAvgSpacing("3");
 
-function getInsertIndexForFamily(fam){
-  // Encontrar el índice donde insertar para mantener filas del mismo ID juntas
-  let insertIndex = 0;
-  
-  // Si es familia 1, insertar después de todas las filas de familia 1
-  if(fam === "1"){
-    const fam1Rows = rows.filter(r => r.fam === "1");
-    if(fam1Rows.length > 0){
-      const lastFam1Index = rows.map((r, i) => r.fam === "1" ? i : -1).filter(i => i >= 0).pop();
-      insertIndex = lastFam1Index + 1;
-    }
-  }
-  // Si es familia 2, insertar después de todas las filas de familia 2
-  else if(fam === "2"){
-    const fam1Count = rows.filter(r => r.fam === "1").length;
-    const fam2Rows = rows.filter(r => r.fam === "2");
-    if(fam2Rows.length > 0){
-      const lastFam2Index = rows.map((r, i) => r.fam === "2" ? i : -1).filter(i => i >= 0).pop();
-      insertIndex = lastFam2Index + 1;
-    } else {
-      insertIndex = fam1Count; // Insertar después de todas las familia 1
-    }
-  }
-  // Si es familia 3, insertar después de todas las filas de familia 3
-  else if(fam === "3"){
-    const fam1Count = rows.filter(r => r.fam === "1").length;
-    const fam2Count = rows.filter(r => r.fam === "2").length;
-    const fam3Rows = rows.filter(r => r.fam === "3");
-    if(fam3Rows.length > 0){
-      const lastFam3Index = rows.map((r, i) => r.fam === "3" ? i : -1).filter(i => i >= 0).pop();
-      insertIndex = lastFam3Index + 1;
-    } else {
-      insertIndex = fam1Count + fam2Count; // Insertar después de familias 1 y 2
-    }
-  }
-  // Para otras familias, insertar al final
-  else {
-    insertIndex = rows.length;
-  }
-  
-  return insertIndex;
-}
-function removeLastRowByFam(fam){
-  for(let i=rows.length-1;i>=0;i--){
-    if(rows[i].fam===fam){
-      rows.splice(i,1);
-      saveRows();
-      renderTable();
-      renderSummary();
-      return;
-    }
-  }
-}
-function delRow(id){rows=rows.filter(r=>r.id!==id);saveRows();renderTable();renderSummary();}
-function doReset(){
-  if(confirm("¿Limpiar todos los datos del formulario?")){
-    rows=[emptyRow("1"),emptyRow("1"),emptyRow("2")];
-    saveRows();
-    document.querySelectorAll(".fi,.fs").forEach(e=>e.value=e.defaultValue||"");
-    sv("h_largo","10");sv("h_altura","15");
-    renderTable();renderSummary();saveHdr();
-  }
-}
+      let jv = 0;
+      if (prom1 !== null && prom1 > 0) jv += 1 / prom1;
+      if (prom2 !== null && prom2 > 0) jv += 1 / prom2;
+      if (prom3 !== null && prom3 > 0) jv += 1 / prom3;
 
-// ═══════════════════════════════════════════════════════
-// EXPORT
-// ═══════════════════════════════════════════════════════
-function dl(content,mime,fname){
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([content],{type:mime}));
-  a.download=fname;a.click();URL.revokeObjectURL(a.href);
-}
-function exportCSV(){
-  const cols=["fam","dist","dip","dipdir","tipo","nstr","aber","esp","cont","espac","next","term","r1","r2","jrc","rug","forma","alt"];
-  const hd=["Familia","Dist_m","Dip","DipDir","Tipo","N_Estr","Abertura","Espesor","Continuidad","Espac_m","N_Ext","Term","Relleno1","Relleno2","JRC","Rugosidad","Forma","Alteracion"];
-  const csv=[hd.join(","),...rows.map(r=>cols.map(c=>r[c]).join(","))].join("\n");
-  dl(csv,"text/csv",`mapeo_${v("h_td2")||"sin_id"}_${new Date().toISOString().slice(0,10)}.csv`);
-}
-function exportJSON(){
-  dl(JSON.stringify({header:getHdr(),rows,fecha:new Date().toISOString()},null,2),"application/json",`mapeo_${v("h_td2")||"sin_id"}_${new Date().toISOString().slice(0,10)}.json`);
-}
+      const allFams = [...new Set(rows.map(r => r.fam))].sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+      const fs = allFams.map(f => {
+        const fr = rows.filter(r => r.fam === f);
+        const v89 = fr.map(r => calcRow(r).v89).filter(v => v !== null);
+        const v76 = fr.map(r => calcRow(r).v76).filter(v => v !== null);
+        return {
+          fam: f,
+          n: fr.length,
+          a89: v89.length ? v89.reduce((a, b) => a + b, 0) / v89.length : null,
+          a76: v76.length ? v76.reduce((a, b) => a + b, 0) / v76.length : null
+        };
+      });
 
-// ═══════════════════════════════════════════════════════
-// CATALOG MODAL
-// ═══════════════════════════════════════════════════════
-const CAT_CONTENT={
-  tipos:`<table class="ct"><thead><tr><th>Código</th><th>Descripción</th></tr></thead><tbody>
-    ${[{code:"JN",d:"Junta"},{code:"BED",d:"Estrato"},{code:"F",d:"Falla"},{code:"SZ",d:"Cizalla"},{code:"CON",d:"Contacto"}].map(r=>`<tr><td class="ck">${r.code}</td><td>${r.d}</td></tr>`).join("")}
+      return {
+        prom1, prom2, prom3,
+        jv, fs
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════
+    let _uid = 0;
+    const uid = () => `r${Date.now()}_${++_uid}`;
+    const emptyRow = (fam = "1") => ({
+      id: uid(), fam, dist: "", dip: "", dipdir: "", tipo: "JN", nstr: "1",
+      aber: "", esp: "", cont: "", espac: "", next: "", term: "", r1: "", r2: "", jrc: "", rug: "", forma: "", alt: ""
+    });
+
+    let rows = [];
+    try { const s = localStorage.getItem("mw_rows"); rows = s ? JSON.parse(s) : [emptyRow("1"), emptyRow("1"), emptyRow("2")]; }
+    catch { rows = [emptyRow("1"), emptyRow("1"), emptyRow("2")]; }
+    rows = rows.map(ensureSelectDefaults);
+
+    function saveRows() { try { localStorage.setItem("mw_rows", JSON.stringify(rows)); } catch { } }
+    function saveHdr() {
+      const h = getHdr();
+      try { localStorage.setItem("mw_hdr", JSON.stringify(h)); } catch { }
+      const badge = document.getElementById("td2-badge");
+      if (h.td2) { badge.textContent = h.td2; badge.style.display = ""; } else badge.style.display = "none";
+      document.getElementById("tbl-lbl").textContent = `⛏ Registro de Discontinuidades  ·  ${rows.length} fila${rows.length !== 1 ? "s" : ""}  ·  Largo máx: ${h.largo || "—"} m`;
+    }
+    function getHdr() {
+      return {
+        td2: v("h_td2"), iniX: v("h_iniX"), iniY: v("h_iniY"), iniC: v("h_iniC"),
+        finX: v("h_finX"), finY: v("h_finY"), finC: v("h_finC"), largo: v("h_largo"),
+        altura: v("h_altura"), dipT: v("h_dipT"), dipdirT: v("h_dipdirT"),
+        dipH: v("h_dipH"), azH: v("h_azH"), lito1: v("h_lito1"), lito2: v("h_lito2"), lito3: v("h_lito3"), lmtM: v("h_lmtM"),
+        sector: v("h_sector"), fase: v("h_fase"), nivel: v("h_nivel"),
+        sectG: v("h_sectG"), intemp: v("h_intemp"), altZona: v("h_altZona"), fecha: v("h_fecha"), mapeador: v("h_mapeador"),
+      };
+    }
+    function v(id) { const e = document.getElementById(id); return e ? e.value : ""; }
+    function sv(id, val) { const e = document.getElementById(id); if (e) e.value = val || ""; }
+    function loadHdrToForm() {
+      try {
+        const s = localStorage.getItem("mw_hdr"); if (!s) return;
+        const h = JSON.parse(s);
+        Object.entries(h).forEach(([k, val]) => sv("h_" + k, val));
+      } catch { }
+    }
+
+    function onHdr() { saveHdr(); renderSummary(); }
+
+    // ═══════════════════════════════════════════════════════
+    // FUNCIONES DE VALIDACIÓN
+    // ═══════════════════════════════════════════════════════
+    function validarGrados(input, min, max) {
+      let valor = parseFloat(input.value);
+
+      if (isNaN(valor)) {
+        input.value = '';
+        return;
+      }
+
+      // Corregir valor si está fuera de rango
+      if (valor < min) {
+        valor = min;
+        input.value = valor;
+      } else if (valor > max) {
+        valor = max;
+        input.value = valor;
+      }
+
+      // Para Dip-Dir Talud°, si es 360, cambiar a 0
+      if (max === 360 && valor === 360) {
+        input.value = 0;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // FUNCIONES LITOLÓGICAS
+    // ═══════════════════════════════════════════════════════
+    function populateLito1Dropdown() {
+      const select = document.getElementById('h_lito1');
+      const unidades = [...new Set(CLASIFICACION_LITOLOGICA.map(item => item.unidad))].sort();
+
+      unidades.forEach(unidad => {
+        const option = document.createElement('option');
+        option.value = unidad;
+        option.textContent = unidad;
+        select.appendChild(option);
+      });
+    }
+
+    function onLito1Change() {
+      const unidadSeleccionada = document.getElementById('h_lito1').value;
+      const litologiaInput = document.getElementById('h_lito2');
+      const codigoInput = document.getElementById('h_lito3');
+      const grupoInput = document.getElementById('h_lmtM');
+
+      if (!unidadSeleccionada) {
+        litologiaInput.value = '';
+        codigoInput.value = '';
+        grupoInput.value = '';
+        onHdr();
+        return;
+      }
+
+      const entradas = CLASIFICACION_LITOLOGICA.filter(item => item.unidad === unidadSeleccionada);
+      if (entradas.length > 0) {
+        const entrada = entradas[0];
+        litologiaInput.value = entrada.litologia;
+        codigoInput.value = entrada.codigo;
+        grupoInput.value = entrada.grupo;
+      }
+      onHdr();
+    }
+
+    const FAM_BG = ["#1e293b", "#1a2e3f", "#1e2d3b", "#1f2d38", "#1e2f3f", "#202c3d", "#1d2e40", "#1f2e3a", "#1e2c3e"];
+    function selOpts(opts, val) {
+      const current = val || firstOptValue(opts);
+      let s = "";
+      opts.forEach(o => {
+        const code = typeof o === "string" ? o : o.code;
+        const lbl = typeof o === "string" ? o : (o.label || o.desc || o.code);
+        s += `<option value="${code}"${current === code ? " selected" : ""}>${lbl}</option>`;
+      });
+      return s;
+    }
+
+    function makeRow(row, idx) {
+      const rt = calcRow(row);
+      const bg = FAM_BG[(parseInt(row.fam) || 1) - 1];
+      const largoMax = parseDecimalInput(v("h_largo")) || 999;
+      const distErr = row.dist !== "" && parseDecimalInput(row.dist) > largoMax;
+      const d = (val, cls = "") => val !== null && val !== undefined ? `<td class="${cls}">${val}</td>` : `<td class="${cls}" style="color:var(--mu)">—</td>`;
+      return `<tr id="tr_${row.id}" style="background:${bg};border-bottom:1px solid var(--bd);">
+    <td style="position:sticky;left:0;background:${bg};z-index:5;">
+      <input class="ti" value="${row.fam}" type="text" inputmode="numeric" maxlength="1" style="width:36px;color:var(--am);font-weight:700;background:transparent;" oninput="updateIntegerInput(this,'${row.id}','fam',1,9)" onchange="commitIntegerInput('${row.id}','fam',this.value,1,9)"/>
+    </td>
+    <td><input class="ti${distErr ? " err" : ""}" value="${row.dist}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:46px" title="${distErr ? `Excede ${largoMax}m` : ""}" oninput="updateBoundedDecimalInput(this,'${row.id}','dist',0,${largoMax})" onchange="commitBoundedDecimalInput('${row.id}','dist',this.value,0,${largoMax})"/></td>
+    <td><input class="ti" value="${row.dip}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','dip',0,90)" onchange="commitIntegerInput('${row.id}','dip',this.value,0,90)"/></td>
+    <td><input class="ti" value="${row.dipdir}" type="text" inputmode="numeric" maxlength="3" style="width:42px" oninput="updateIntegerInput(this,'${row.id}','dipdir',0,360)" onchange="commitIntegerInput('${row.id}','dipdir',this.value,0,360)"/></td>
+    <td><select class="ts" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t => ({ code: t.code, label: t.code })), row.tipo)}</select></td> 
+    <td><input class="ti" value="${row.nstr}" type="text" inputmode="numeric" maxlength="2" style="width:34px" oninput="updateIntegerInput(this,'${row.id}','nstr',1,20)" onchange="commitIntegerInput('${row.id}','nstr',this.value,1,20)"/></td>
+    <td><input class="ti" value="${row.aber}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:100px" oninput="updateDecimalInput(this,'${row.id}','aber')" onchange="commitDecimalInput('${row.id}','aber',this.value)"/></td>
+    <td><input class="ti" value="${row.esp}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:64px" oninput="updateDecimalInput(this,'${row.id}','esp')" onchange="commitDecimalInput('${row.id}','esp',this.value)"/></td>
+    <td><input class="ti" value="${row.cont}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:76px" oninput="updateDecimalInput(this,'${row.id}','cont')" onchange="commitDecimalInput('${row.id}','cont',this.value)"/></td>
+    <td><input class="ti" value="${row.espac}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:44px" oninput="updateDecimalInput(this,'${row.id}','espac')" onchange="commitDecimalInput('${row.id}','espac',this.value)"/></td>
+    <td><select class="ts" style="width:70px" onfocus="setExtreSelectMode(this,true)" onmousedown="setExtreSelectMode(this,true)" onchange="updRow('${row.id}','next',this.value);setExtreSelectMode(this,false)" onblur="setExtreSelectMode(this,false)">${selOpts(EST_EXTRE.map(e => ({ code: e.code, label: e.code })), row.next)}</select></td>
+    <td><input class="ti" value="${row.term}" type="text" inputmode="numeric" maxlength="1" style="width:44px" oninput="updateIntegerInput(this,'${row.id}','term',0,5)" onchange="commitIntegerInput('${row.id}','term',this.value,0,5)"/></td>
+    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r1',this.value)">${selOpts(RELLENO.map(r => r.code), row.r1)}</select></td>
+    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r2',this.value)">${selOpts(RELLENO.map(r => ({ code: r.code, label: r.code })), row.r2)}</select></td>
+    <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r1_89 !== null ? rt.r1_89 : "—"}</td>
+    <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r2_89 !== null ? rt.r2_89 : "—"}</td>
+    <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r1_76 !== null ? rt.r1_76 : "—"}</td>
+    <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r2_76 !== null ? rt.r2_76 : "—"}</td>
+    <td><input class="ti" value="${row.jrc}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','jrc',0,20)" onchange="commitIntegerInput('${row.id}','jrc',this.value,0,20)"/></td>
+    <td><input class="ti" value="${row.rug}" type="text" inputmode="numeric" maxlength="1" style="width:44px" oninput="updateIntegerInput(this,'${row.id}','rug',1,9)" onchange="commitIntegerInput('${row.id}','rug',this.value,1,9)"/></td>
+    <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','forma',this.value)">${selOpts(FORMA_EST.map(f => ({ code: f.code, label: f.code })), row.forma)}</select></td>
+    <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','alt',this.value)">${selOpts(ALTERACION.map(a => ({ code: a.code, label: a.code })), row.alt)}</select></td>
+    ${d(rt.a89, "td89")}${d(rt.rel89, "td89")}${d(rt.co89, "td89")}${d(rt.ab89, "td89")}${d(rt.rug89, "td89")}${d(rt.v89, "td89v")}
+    ${d(rt.a76, "td76")}${d(rt.rel76, "td76")}${d(rt.co76, "td76")}${d(rt.ab76, "td76")}${d(rt.rug76, "td76")}${d(rt.v76, "td76v")}
+    <td><button class="del-btn" onclick="delRow('${row.id}')">×</button></td>
+  </tr>`;
+    }
+
+
+    function renderTable() {
+      const sorted = [...rows].sort((a, b) => (parseInt(a.fam) || 0) - (parseInt(b.fam) || 0));
+      document.getElementById("tbl-body").innerHTML = sorted.map(makeRow).join("");
+      saveHdr();
+    }
+    function renderSummary() {
+      const s = calcSummary();
+      const fmt = v => v !== null ? v.toFixed(4) : "—";
+      let html = `<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+    <div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">
+        PROMEDIOS ESPACIAMIENTO
+      </div>
+      ${[["PROM 1:", s.prom1], ["PROM 2:", s.prom2], ["PROM 3:", s.prom3]].map(([lbl, val]) => `
+      <div class="stat-row">
+        <span class="stat-lbl">${lbl}</span>
+        <span class="stat-v" style="background:var(--bg3);color:var(--mu);border:1px solid var(--bd);">${fmt(val)}</span>
+      </div>`).join("")}
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">ÍNDICE VOLUMÉTRICO</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--mu);font-size:12px;">JV =</span>
+        <span class="stat-v sv-am">${s.jv > 0 ? s.jv.toFixed(4) : "—"}</span>
+        <span style="font-size:10px;color:var(--mu);">jts/m³</span>
+      </div>
+    </div>`;
+      if (s.fs.length) {
+        html += `<div>
+      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">POR FAMILIA</div>
+      <table style="font-size:11px;border-collapse:collapse;">
+        <tr style="border-bottom:1px solid var(--bd);">
+          <th style="text-align:left;padding-right:12px;color:var(--mu);">Fam</th>
+          <th style="padding-right:10px;color:var(--mu);">N</th>
+          <th style="padding-right:8px;color:var(--pk);">Avg 89</th>
+          <th style="color:var(--or);">Avg 76</th>
+        </tr>
+        ${s.fs.map(f => `<tr style="border-bottom:1px solid rgba(51,65,85,.4);">
+          <td style="padding-right:12px;color:var(--am);font-weight:700;padding-top:4px;">${f.fam}</td>
+          <td style="padding-right:10px;color:var(--mu);text-align:center;">${f.n}</td>
+          <td style="padding-right:8px;color:var(--pk);text-align:center;font-family:monospace;">${f.a89 !== null ? f.a89.toFixed(1) : "—"}</td>
+          <td style="color:var(--or);text-align:center;font-family:monospace;">${f.a76 !== null ? f.a76.toFixed(1) : "—"}</td>
+        </tr>`).join("")}
+      </table>
+    </div>`;
+      }
+      html += "</div>";
+      document.getElementById("summary-card").innerHTML = html;
+    }
+
+    function updRow(id, k, val) {
+      const r = rows.find(x => x.id === id);
+      if (r) {
+        if (k === 'fam') {
+          const count = rows.filter(row => row.fam === val && row.id !== id).length;
+          if (count >= 3) {
+            alert("Máximo 3 filas permitidas para familia " + val);
+            renderTable();
+            return;
+          }
+        }
+        r[k] = val; saveRows(); renderTable(); renderSummary();
+      }
+    }
+    function getControlFam() {
+      const el = document.getElementById("fam-control");
+      return el && el.value ? el.value : "1";
+    }
+    function addRowFromControl() { addRow(getControlFam()); }
+    function removeLastRowFromControl() { removeLastRowByFam(getControlFam()); }
+    function addRow(fam) {
+      let f = parseInt(fam) || 1;
+      while (f <= 9) {
+        if (rows.filter(r => r.fam === String(f)).length < 3) {
+          rows.push(emptyRow(String(f)));
+          saveRows(); renderTable(); renderSummary();
+          return;
+        }
+        f++;
+      }
+      alert("Se ha alcanzado el límite de 3 filas para todas las familias (1-9).");
+    }
+    function removeLastRowByFam(fam) {
+      for (let i = rows.length - 1; i >= 0; i--) {
+        if (rows[i].fam === fam) {
+          rows.splice(i, 1);
+          saveRows();
+          renderTable();
+          renderSummary();
+          return;
+        }
+      }
+    }
+    function delRow(id) { rows = rows.filter(r => r.id !== id); saveRows(); renderTable(); renderSummary(); }
+    function doReset() {
+      if (confirm("¿Limpiar todos los datos del formulario?")) {
+        rows = [emptyRow("1"), emptyRow("1"), emptyRow("2")];
+        saveRows();
+        document.querySelectorAll(".fi,.fs").forEach(e => e.value = e.defaultValue || "");
+        sv("h_largo", "10"); sv("h_altura", "15");
+        renderTable(); renderSummary(); saveHdr();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // EXPORT
+    // ═══════════════════════════════════════════════════════
+    function dl(content, mime, fname) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+      a.download = fname; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function exportCSV() {
+      const cols = ["fam", "dist", "dip", "dipdir", "tipo", "nstr", "aber", "esp", "cont", "espac", "next", "term", "r1", "r2", "jrc", "rug", "forma", "alt"];
+      const hd = ["Familia", "Dist_m", "Dip", "DipDir", "Tipo", "N_Estr", "Abertura", "Espesor", "Continuidad", "Espac_m", "N_Ext", "Term", "Relleno1", "Relleno2", "JRC", "Rugosidad", "Forma", "Alteracion"];
+      const csv = [hd.join(","), ...rows.map(r => cols.map(c => r[c]).join(","))].join("\n");
+      dl(csv, "text/csv", `mapeo_${v("h_td2") || "sin_id"}_${new Date().toISOString().slice(0, 10)}.csv`);
+    }
+    function exportJSON() {
+      dl(JSON.stringify({ header: getHdr(), rows, fecha: new Date().toISOString() }, null, 2), "application/json", `mapeo_${v("h_td2") || "sin_id"}_${new Date().toISOString().slice(0, 10)}.json`);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // CATALOG MODAL
+    // ═══════════════════════════════════════════════════════
+    const CAT_CONTENT = {
+      tipos: `<table class="ct"><thead><tr><th>Código</th><th>Descripción</th></tr></thead><tbody>
+    ${[{ code: "JN", d: "Junta" }, { code: "BED", d: "Estrato" }, { code: "F", d: "Falla" }, { code: "SZ", d: "Cizalla" }, { code: "CON", d: "Contacto" }].map(r => `<tr><td class="ck">${r.code}</td><td>${r.d}</td></tr>`).join("")}
   </tbody></table>`,
-  abertura:`<table class="ct"><thead><tr><th>Abertura</th><th>Rango (mm)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
-    ${ABERTURA.map(r=>`<tr><td>${r.label}</td><td style="text-align:center;font-family:monospace;">${r.mm}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+      abertura: `<table class="ct"><thead><tr><th>Abertura</th><th>Rango (mm)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${ABERTURA.map(r => `<tr><td>${r.label}</td><td style="text-align:center;font-family:monospace;">${r.mm}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
   </tbody></table>`,
-  continuidad:`<table class="ct"><thead><tr><th>Continuidad</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
-    ${CONTINUIDAD.map(r=>`<tr><td>${r.label}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+      continuidad: `<table class="ct"><thead><tr><th>Continuidad</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${CONTINUIDAD.map(r => `<tr><td>${r.label}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
   </tbody></table>`,
-  relleno:`<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Espesor determina columna Duro/Blando. Rating final = mínimo de Relleno 1 y Relleno 2 (peor caso).</p>
+      relleno: `<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Espesor determina columna Duro/Blando. Rating final = mínimo de Relleno 1 y Relleno 2 (peor caso).</p>
     <table class="ct" style="margin-bottom:12px;"><thead><tr><th>Espesor (mm)</th><th>Código</th></tr></thead><tbody>
       <tr><td>&lt;5 mm</td><td class="ck" style="text-align:center;">1</td></tr>
       <tr><td>&gt;5 mm</td><td class="ck" style="text-align:center;">2</td></tr>
@@ -1228,164 +1718,165 @@ const CAT_CONTENT={
       <tr><th>Relleno</th><th>Tipo</th><th class="co">Sin(89)</th><th class="co">D&lt;5(89)</th><th class="co">D&gt;5(89)</th><th class="co">B&lt;5(89)</th><th class="co">B&gt;5(89)</th>
       <th class="cp">Sin(76)</th><th class="cp">D&lt;5(76)</th><th class="cp">D&gt;5(76)</th><th class="cp">B&lt;5(76)</th><th class="cp">B&gt;5(76)</th></tr>
     </thead><tbody>
-      ${RELLENO.map(r=>`<tr><td class="ck">${r.code}</td><td style="text-align:center;">${r.tipo}</td>
-        <td class="co">${r.sin89??""}</td><td class="co">${r.dlt5_89??""}</td><td class="co">${r.dgt5_89??""}</td><td class="co">${r.blt5_89??""}</td><td class="co">${r.bgt5_89??""}</td>
-        <td class="cp">${r.sin76??""}</td><td class="cp">${r.dlt5_76??""}</td><td class="cp">${r.dgt5_76??""}</td><td class="cp">${r.blt5_76??""}</td><td class="cp">${r.bgt5_76??""}</td>
+      ${RELLENO.map(r => `<tr><td class="ck">${r.code}</td><td style="text-align:center;">${r.tipo}</td>
+        <td class="co">${r.sin89 ?? ""}</td><td class="co">${r.dlt5_89 ?? ""}</td><td class="co">${r.dgt5_89 ?? ""}</td><td class="co">${r.blt5_89 ?? ""}</td><td class="co">${r.bgt5_89 ?? ""}</td>
+        <td class="cp">${r.sin76 ?? ""}</td><td class="cp">${r.dlt5_76 ?? ""}</td><td class="cp">${r.dgt5_76 ?? ""}</td><td class="cp">${r.blt5_76 ?? ""}</td><td class="cp">${r.bgt5_76 ?? ""}</td>
       </tr>`).join("")}
     </tbody></table>`,
-  rugosidad:`<table class="ct"><thead><tr><th>Perfil (1–9)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
-    ${Object.entries(RUGOSIDAD).map(([k,v])=>`<tr><td class="ck" style="text-align:center;">${k}</td><td class="co">${v[0]}</td><td class="cp">${v[1]}</td></tr>`).join("")}
+      rugosidad: `<table class="ct"><thead><tr><th>Perfil (1–9)</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${Object.entries(RUGOSIDAD).map(([k, v]) => `<tr><td class="ck" style="text-align:center;">${k}</td><td class="co">${v[0]}</td><td class="cp">${v[1]}</td></tr>`).join("")}
   </tbody></table>`,
-  forma:`<table class="ct"><thead><tr><th>Código</th><th>Forma de Estructura</th></tr></thead><tbody>
-    ${[{code:"P",desc:"Plana"},{code:"C",desc:"Curva"},{code:"O",desc:"Ondulada"},{code:"E",desc:"Escalonada"},{code:"I",desc:"Irregular"}].map(r=>`<tr><td class="ck">${r.code}</td><td>${r.desc}</td></tr>`).join("")}
+      forma: `<table class="ct"><thead><tr><th>Código</th><th>Forma de Estructura</th></tr></thead><tbody>
+    ${[{ code: "P", desc: "Plana" }, { code: "C", desc: "Curva" }, { code: "O", desc: "Ondulada" }, { code: "E", desc: "Escalonada" }, { code: "I", desc: "Irregular" }].map(r => `<tr><td class="ck">${r.code}</td><td>${r.desc}</td></tr>`).join("")}
   </tbody></table>`,
-  alteracion:`<table class="ct"><thead><tr><th>Código</th><th>Grado de Meteorización</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
-    ${ALTERACION.map(r=>`<tr><td class="ck">${r.code}</td><td>${r.label.split("—")[1]?.trim()}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
+      alteracion: `<table class="ct"><thead><tr><th>Código</th><th>Grado de Meteorización</th><th class="co">Rating 89</th><th class="cp">Rating 76</th></tr></thead><tbody>
+    ${ALTERACION.map(r => `<tr><td class="ck">${r.code}</td><td>${r.label.split("—")[1]?.trim()}</td><td class="co">${r.r89}</td><td class="cp">${r.r76}</td></tr>`).join("")}
   </tbody></table>`,
-  jrc:`<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Compare el perfil de la superficie de fractura con la figura JRC para determinar el valor de JRC (0–20) y el número de rugosidad (1–9).</p>
+      jrc: `<p style="font-size:11px;color:var(--mu);margin-bottom:10px;">Compare el perfil de la superficie de fractura con la figura JRC para determinar el valor de JRC (0–20) y el número de rugosidad (1–9).</p>
     <table class="ct"><thead><tr><th>Rango JRC</th><th>N° Perfil Rugosidad</th></tr></thead><tbody>
-    ${[["0–2","9"],["2–4","8"],["4–6","7"],["6–8","6"],["8–10","5"],["10–12","4"],["12–14","3"],["14–16","2"],["16–18","1"],["18–20","1"]].map(([r,p])=>`<tr><td>${r}</td><td class="ck" style="text-align:center;">${p}</td></tr>`).join("")}
+    ${[["0–2", "9"], ["2–4", "8"], ["4–6", "7"], ["6–8", "6"], ["8–10", "5"], ["10–12", "4"], ["12–14", "3"], ["14–16", "2"], ["16–18", "1"], ["18–20", "1"]].map(([r, p]) => `<tr><td>${r}</td><td class="ck" style="text-align:center;">${p}</td></tr>`).join("")}
     </tbody></table>
     <p style="font-size:10px;color:var(--mu);margin-top:8px;">Fuente: ISRM 1989 — Perfiles de Rugosidad típicos. Rugosidad 1=más rugosa, 9=plana estriada.</p>`,
-};
-function openCatalog(){document.getElementById("cat-overlay").style.display="flex";showTab("tipos",document.querySelector(".mtab"));}
-function closeCatalog(){document.getElementById("cat-overlay").style.display="none";}
-function showTab(key,btn){
-  document.querySelectorAll(".mtab").forEach(b=>b.classList.remove("act"));
-  btn.classList.add("act");
-  document.getElementById("cat-body").innerHTML=CAT_CONTENT[key]||"";
-}
+    };
+    function openCatalog() { document.getElementById("cat-overlay").style.display = "flex"; showTab("tipos", document.querySelector(".mtab")); }
+    function closeCatalog() { document.getElementById("cat-overlay").style.display = "none"; }
+    function showTab(key, btn) {
+      document.querySelectorAll(".mtab").forEach(b => b.classList.remove("act"));
+      btn.classList.add("act");
+      document.getElementById("cat-body").innerHTML = CAT_CONTENT[key] || "";
+    }
 
-// ═══════════════════════════════════════════════════════
-// RMR Functions
-// ═══════════════════════════════════════════════════════
-function toggleRMR(){
-  const rmrSection = document.getElementById('rmr-section');
-  if(rmrSection.style.display === 'none' || rmrSection.style.display === ''){
-    rmrSection.style.display = 'block';
-    loadRMRData();
-  } else {
-    rmrSection.style.display = 'none';
-  }
-}
+    // ═══════════════════════════════════════════════════════
+    // RMR Functions
+    // ═══════════════════════════════════════════════════════
+    function toggleRMR() {
+      const rmrSection = document.getElementById('rmr-section');
+      if (rmrSection.style.display === 'none' || rmrSection.style.display === '') {
+        rmrSection.style.display = 'block';
+        loadRMRData();
+      } else {
+        rmrSection.style.display = 'none';
+      }
+    }
 
-function loadRMRData(){
-  // Load header data
-  const hdr = getHdr();
-  document.getElementById('r_fecha').textContent = hdr.fecha || '—';
-  document.getElementById('r_tdCode').textContent = hdr.td_code || '—';
-  
-  // Load RMR inputs with default values
-  document.getElementById('r_agua').value = 'C';
-  document.getElementById('r_ucs').value = '74';
-  document.getElementById('r_is50').value = '5';
-  document.getElementById('r_gsiCond').value = 'G';
-  document.getElementById('r_gsiEstruc').value = 'VB';
-  document.getElementById('r_gsiVisual').value = '56';
-  document.getElementById('r_ctrl').value = '3';
-  document.getElementById('r_vol').value = '3';
-  
-  // Calculate and display RMR values
-  recalcRMR();
-}
+    function loadRMRData() {
+      // Load header data
+      const hdr = getHdr();
+      document.getElementById('r_fecha').textContent = hdr.fecha || '—';
+      document.getElementById('r_tdCode').textContent = hdr.td_code || '—';
 
-function recalcRMR(){
-  // Get values from RMR inputs
-  const agua = document.getElementById('r_agua').value;
-  const ucs = parseFloat(document.getElementById('r_ucs').value) || 74;
-  const is50 = parseFloat(document.getElementById('r_is50').value) || 5;
-  const gsiCond = document.getElementById('r_gsiCond').value;
-  const gsiEstruc = document.getElementById('r_gsiEstruc').value;
-  const gsiVisual = parseFloat(document.getElementById('r_gsiVisual').value) || 56;
-  const ctrl = parseFloat(document.getElementById('r_ctrl').value) || 3;
-  const vol = parseFloat(document.getElementById('r_vol').value) || 3;
-  
-  // Get calculated values from summary
-  const s = calcSummary();
-  
-  // Calculate RQD from JV
-  const jv = s.jv || 0;
-  const rqd_pct = Math.max(0, 115 - 3.3 * jv);
-  
-  // Calculate RMR values (simplified version)
-  const aguaRatings = {
-    'C': {r89: 15, r76: 10},
-    'H': {r89: 10, r76: 7},
-    'M': {r89: 7, r76: 4},
-    'E': {r89: 4, r76: 1},
-    'F': {r89: 0, r76: 0}
-  };
-  
-  const aguaRating = aguaRatings[agua] || {r89: 10, r76: 7};
-  
-  // Simplified resistance rating based on UCS
-  const resRating = ucs > 250 ? {r89: 15, r76: 12} : 
-                   ucs > 100 ? {r89: 12, r76: 8} : 
-                   ucs > 50 ? {r89: 8, r76: 5} : 
-                   {r89: 5, r76: 3};
-  
-  const espacRating = s.p1_89 !== null && s.p1_89 > 0 ? {rating: 20} : {rating: 0};
-  
-  const rmr89 = Math.round(aguaRating.r89 + resRating.r89 + rqd_pct/5 + espacRating.rating);
-  const rmr76 = Math.round(aguaRating.r76 + resRating.r76 + rqd_pct/5 + espacRating.rating);
-  
-  // Update display values
-  document.getElementById('rmr76_val').textContent = rmr76;
-  document.getElementById('rmr89_val').textContent = rmr89;
-  
-  // Update table values
-  document.getElementById('r76_agua').textContent = agua;
-  document.getElementById('r76_aguaVal').textContent = aguaRating.r76;
-  document.getElementById('r76_resist').textContent = ucs > 250 ? 'A' : ucs > 100 ? 'B' : ucs > 50 ? 'C' : 'D';
-  document.getElementById('r76_resistVal').textContent = resRating.r76;
-  document.getElementById('r76_gsiCond').textContent = gsiCond;
-  document.getElementById('r76_gsiEstruc').textContent = gsiEstruc;
-  document.getElementById('r76_gsiVisual').textContent = gsiVisual;
-  document.getElementById('r76_ctrl').textContent = ctrl;
-  document.getElementById('r76_vol').textContent = vol;
-  document.getElementById('r76_rqdVal').textContent = Math.round(rqd_pct);
-  document.getElementById('r76_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
-  document.getElementById('r76_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
-  document.getElementById('r76_espacVal').textContent = espacRating.rating;
-  document.getElementById('r76_condisc').textContent = espacRating.rating;
-  document.getElementById('r76_rmr').textContent = rmr76;
-  document.getElementById('r76_ucs').textContent = ucs;
-  document.getElementById('r76_is50').textContent = is50;
-  
-  document.getElementById('r89_agua').textContent = agua;
-  document.getElementById('r89_aguaVal').textContent = aguaRating.r89;
-  document.getElementById('r89_resist').textContent = ucs > 250 ? 'A' : ucs > 100 ? 'B' : ucs > 50 ? 'C' : 'D';
-  document.getElementById('r89_resistVal').textContent = resRating.r89;
-  document.getElementById('r89_gsiCond').textContent = gsiCond;
-  document.getElementById('r89_gsiEstruc').textContent = gsiEstruc;
-  document.getElementById('r89_gsiVisual').textContent = gsiVisual;
-  document.getElementById('r89_ctrl').textContent = ctrl;
-  document.getElementById('r89_vol').textContent = vol;
-  document.getElementById('r89_rqdVal').textContent = Math.round(rqd_pct);
-  document.getElementById('r89_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
-  document.getElementById('r89_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
-  document.getElementById('r89_espacVal').textContent = espacRating.rating;
-  document.getElementById('r89_condisc').textContent = espacRating.rating;
-  document.getElementById('r89_rmr').textContent = rmr89;
-  document.getElementById('r89_ucs').textContent = ucs;
-  document.getElementById('r89_is50').textContent = is50;
-  
-  // Update formula display
-  const p1 = s.p1_89 || 0;
-  const p2 = s.p2_89 || 0;
-  const p3 = s.p3_89 || 0;
-  document.getElementById('rmr_formula').innerHTML = 
-    `**Jv** = (1/${p1.toFixed(3)}) + (1/${p2.toFixed(3)}) + (1/${p3.toFixed(3)}) = **${jv.toFixed(3)}** | **RQD%** = 115 − 3.3 × ${jv.toFixed(2)} = **${rqd_pct.toFixed(1)}%**`;
-}
+      // Load RMR inputs with default values
+      document.getElementById('r_agua').value = 'C';
+      document.getElementById('r_ucs').value = '74';
+      document.getElementById('r_is50').value = '5';
+      document.getElementById('r_gsiCond').value = 'G';
+      document.getElementById('r_gsiEstruc').value = 'VB';
+      document.getElementById('r_gsiVisual').value = '56';
+      document.getElementById('r_ctrl').value = '3';
+      document.getElementById('r_vol').value = '3';
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-loadHdrToForm();
-populateLito1Dropdown();
-renderTable();
-renderSummary();
-saveHdr();
-</script>
+      // Calculate and display RMR values
+      recalcRMR();
+    }
+
+    function recalcRMR() {
+      // Get values from RMR inputs
+      const agua = document.getElementById('r_agua').value;
+      const ucs = parseFloat(document.getElementById('r_ucs').value) || 74;
+      const is50 = parseFloat(document.getElementById('r_is50').value) || 5;
+      const gsiCond = document.getElementById('r_gsiCond').value;
+      const gsiEstruc = document.getElementById('r_gsiEstruc').value;
+      const gsiVisual = parseFloat(document.getElementById('r_gsiVisual').value) || 56;
+      const ctrl = parseFloat(document.getElementById('r_ctrl').value) || 3;
+      const vol = parseFloat(document.getElementById('r_vol').value) || 3;
+
+      // Get calculated values from summary
+      const s = calcSummary();
+
+      // Calculate RQD from JV
+      const jv = s.jv || 0;
+      const rqd_pct = Math.max(0, 115 - 3.3 * jv);
+
+      // Calculate RMR values (simplified version)
+      const aguaRatings = {
+        'C': { r89: 15, r76: 10 },
+        'H': { r89: 10, r76: 7 },
+        'M': { r89: 7, r76: 4 },
+        'E': { r89: 4, r76: 1 },
+        'F': { r89: 0, r76: 0 }
+      };
+
+      const aguaRating = aguaRatings[agua] || { r89: 10, r76: 7 };
+
+      // Simplified resistance rating based on UCS
+      const resRating = ucs > 250 ? { r89: 15, r76: 12 } :
+        ucs > 100 ? { r89: 12, r76: 8 } :
+          ucs > 50 ? { r89: 8, r76: 5 } :
+            { r89: 5, r76: 3 };
+
+      const espacRating = s.p1_89 !== null && s.p1_89 > 0 ? { rating: 20 } : { rating: 0 };
+
+      const rmr89 = Math.round(aguaRating.r89 + resRating.r89 + rqd_pct / 5 + espacRating.rating);
+      const rmr76 = Math.round(aguaRating.r76 + resRating.r76 + rqd_pct / 5 + espacRating.rating);
+
+      // Update display values
+      document.getElementById('rmr76_val').textContent = rmr76;
+      document.getElementById('rmr89_val').textContent = rmr89;
+
+      // Update table values
+      document.getElementById('r76_agua').textContent = agua;
+      document.getElementById('r76_aguaVal').textContent = aguaRating.r76;
+      document.getElementById('r76_resist').textContent = ucs > 250 ? 'A' : ucs > 100 ? 'B' : ucs > 50 ? 'C' : 'D';
+      document.getElementById('r76_resistVal').textContent = resRating.r76;
+      document.getElementById('r76_gsiCond').textContent = gsiCond;
+      document.getElementById('r76_gsiEstruc').textContent = gsiEstruc;
+      document.getElementById('r76_gsiVisual').textContent = gsiVisual;
+      document.getElementById('r76_ctrl').textContent = ctrl;
+      document.getElementById('r76_vol').textContent = vol;
+      document.getElementById('r76_rqdVal').textContent = Math.round(rqd_pct);
+      document.getElementById('r76_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
+      document.getElementById('r76_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
+      document.getElementById('r76_espacVal').textContent = espacRating.rating;
+      document.getElementById('r76_condisc').textContent = espacRating.rating;
+      document.getElementById('r76_rmr').textContent = rmr76;
+      document.getElementById('r76_ucs').textContent = ucs;
+      document.getElementById('r76_is50').textContent = is50;
+
+      document.getElementById('r89_agua').textContent = agua;
+      document.getElementById('r89_aguaVal').textContent = aguaRating.r89;
+      document.getElementById('r89_resist').textContent = ucs > 250 ? 'A' : ucs > 100 ? 'B' : ucs > 50 ? 'C' : 'D';
+      document.getElementById('r89_resistVal').textContent = resRating.r89;
+      document.getElementById('r89_gsiCond').textContent = gsiCond;
+      document.getElementById('r89_gsiEstruc').textContent = gsiEstruc;
+      document.getElementById('r89_gsiVisual').textContent = gsiVisual;
+      document.getElementById('r89_ctrl').textContent = ctrl;
+      document.getElementById('r89_vol').textContent = vol;
+      document.getElementById('r89_rqdVal').textContent = Math.round(rqd_pct);
+      document.getElementById('r89_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
+      document.getElementById('r89_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
+      document.getElementById('r89_espacVal').textContent = espacRating.rating;
+      document.getElementById('r89_condisc').textContent = espacRating.rating;
+      document.getElementById('r89_rmr').textContent = rmr89;
+      document.getElementById('r89_ucs').textContent = ucs;
+      document.getElementById('r89_is50').textContent = is50;
+
+      // Update formula display
+      const p1 = s.p1_89 || 0;
+      const p2 = s.p2_89 || 0;
+      const p3 = s.p3_89 || 0;
+      document.getElementById('rmr_formula').innerHTML =
+        `**Jv** = (1/${p1.toFixed(3)}) + (1/${p2.toFixed(3)}) + (1/${p3.toFixed(3)}) = **${jv.toFixed(3)}** | **RQD%** = 115 − 3.3 × ${jv.toFixed(2)} = **${rqd_pct.toFixed(1)}%**`;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════
+    loadHdrToForm();
+    populateLito1Dropdown();
+    renderTable();
+    renderSummary();
+    saveHdr();
+  </script>
 </body>
+
 </html>
