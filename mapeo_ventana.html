@@ -324,36 +324,36 @@
     }
 
     .th89 {
-      background: rgba(251, 146, 60, 0.1);
-      color: var(--or);
-      border-bottom: 2px solid var(--or) !important;
-    }
-
-    .th76 {
       background: rgba(244, 114, 182, 0.1);
       color: var(--pk);
       border-bottom: 2px solid var(--pk) !important;
     }
 
-    .td89 {
-      background: rgba(251, 146, 60, 0.05);
+    .th76 {
+      background: rgba(251, 146, 60, 0.1);
       color: var(--or);
+      border-bottom: 2px solid var(--or) !important;
     }
 
-    .td89v {
-      background: rgba(251, 146, 60, 0.15);
-      color: #fed7aa;
-      font-weight: 700;
-    }
-
-    .td76 {
+    .td89 {
       background: rgba(244, 114, 182, 0.05);
       color: var(--pk);
     }
 
-    .td76v {
+    .td89v {
       background: rgba(244, 114, 182, 0.1);
       color: #fbcfe8;
+      font-weight: 700;
+    }
+
+    .td76 {
+      background: rgba(251, 146, 60, 0.05);
+      color: var(--or);
+    }
+
+    .td76v {
+      background: rgba(251, 146, 60, 0.15);
+      color: #fed7aa;
       font-weight: 700;
     }
 
@@ -1796,6 +1796,54 @@
       // Calculate RQD from JV
       const jv = s.jv || 0;
       const rqd_pct = Math.max(0, 115 - 3.3 * jv);
+      const rqdRating = rqd_pct >= 90 ? { r89: 20, r76: 20 } :
+        rqd_pct >= 75 ? { r89: 17, r76: 17 } :
+          rqd_pct >= 50 ? { r89: 13, r76: 13 } :
+            rqd_pct >= 25 ? { r89: 8, r76: 8 } :
+              { r89: 3, r76: 3 };
+      let espacProm = null;
+      let espacNum = 0;
+      let estructNum = 0;
+      rows.forEach(r => {
+        const nEstruct = parseInt(r.nstr, 10);
+        const espac = parseDecimalInput(r.espac);
+        if (!isNaN(nEstruct) && nEstruct > 0 && !isNaN(espac) && espac > 0) {
+          espacNum += nEstruct * espac;
+          estructNum += nEstruct;
+        }
+      });
+      if (estructNum > 0) espacProm = espacNum / estructNum;
+      const freqFrac = espacProm !== null && espacProm > 0 ? (1 / espacProm) + 1 : null;
+      const p1_89 = Number(s.p1_89), p2_89 = Number(s.p2_89), p3_89 = Number(s.p3_89);
+      const p1_76 = Number(s.p1_76), p2_76 = Number(s.p2_76), p3_76 = Number(s.p3_76);
+      const tamBloque89 = [p1_89, p2_89, p3_89].every(Number.isFinite)
+        ? (p1_89 + p2_89 + p3_89) / 3
+        : null;
+      const tamBloque76 = [p1_76, p2_76, p3_76].every(Number.isFinite)
+        ? (p1_76 + p2_76 + p3_76) / 3
+        : null;
+      let condiscNum89 = 0, condiscNum76 = 0, condiscDen = 0;
+      rows.forEach(r => {
+        const nEstruct = parseInt(r.nstr, 10);
+        const rt = calcRow(r);
+        if (!isNaN(nEstruct) && nEstruct > 0) {
+          if (rt.v89 !== null) condiscNum89 += rt.v89 * nEstruct;
+          if (rt.v76 !== null) condiscNum76 += rt.v76 * nEstruct;
+          if (rt.v89 !== null || rt.v76 !== null) condiscDen += nEstruct;
+        }
+      });
+      const condisc89 = condiscDen > 0 ? condiscNum89 / condiscDen : null;
+      const condisc76 = condiscDen > 0 ? condiscNum76 / condiscDen : null;
+      const espacRating89 = espacProm === null ? 0 :
+        espacProm > 2 ? 20 :
+          espacProm >= 0.6 ? 15 :
+            espacProm >= 0.2 ? 10 :
+              espacProm >= 0.06 ? 8 : 5;
+      const espacRating76 = espacProm === null ? 0 :
+        espacProm > 3 ? 30 :
+          espacProm >= 1 ? 25 :
+            espacProm >= 0.3 ? 20 :
+              espacProm >= 0.05 ? 10 : 5;
 
       // Calculate RMR values (simplified version)
       const aguaRatings = {
@@ -1814,10 +1862,8 @@
           ucs > 50 ? { r89: 8, r76: 5 } :
             { r89: 5, r76: 3 };
 
-      const espacRating = s.p1_89 !== null && s.p1_89 > 0 ? { rating: 20 } : { rating: 0 };
-
-      const rmr89 = Math.round(aguaRating.r89 + resRating.r89 + rqd_pct / 5 + espacRating.rating);
-      const rmr76 = Math.round(aguaRating.r76 + resRating.r76 + rqd_pct / 5 + espacRating.rating);
+      const rmr89 = Math.round(aguaRating.r89 + resRating.r89 + rqdRating.r89 + espacRating89 + (condisc89 !== null ? condisc89 : 0));
+      const rmr76 = Math.round(aguaRating.r76 + resRating.r76 + rqdRating.r76 + espacRating76 + (condisc76 !== null ? condisc76 : 0));
 
       // Update display values
       document.getElementById('rmr76_val').textContent = rmr76;
@@ -1833,11 +1879,13 @@
       document.getElementById('r76_gsiVisual').textContent = gsiVisual;
       document.getElementById('r76_ctrl').textContent = ctrl;
       document.getElementById('r76_vol').textContent = vol;
-      document.getElementById('r76_rqdVal').textContent = Math.round(rqd_pct);
+      document.getElementById('r76_rqdVal').textContent = rqdRating.r76;
       document.getElementById('r76_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
-      document.getElementById('r76_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
-      document.getElementById('r76_espacVal').textContent = espacRating.rating;
-      document.getElementById('r76_condisc').textContent = espacRating.rating;
+      document.getElementById('r76_freq').textContent = freqFrac !== null ? freqFrac.toFixed(2) : '—';
+      document.getElementById('r76_bloque').textContent = tamBloque76 !== null ? tamBloque76.toFixed(2) : '—';
+      document.getElementById('r76_espacProm').textContent = espacProm !== null ? espacProm.toFixed(2) : '—';
+      document.getElementById('r76_espacVal').textContent = espacRating76;
+      document.getElementById('r76_condisc').textContent = condisc76 !== null ? condisc76.toFixed(2) : '—';
       document.getElementById('r76_rmr').textContent = rmr76;
       document.getElementById('r76_ucs').textContent = ucs;
       document.getElementById('r76_is50').textContent = is50;
@@ -1851,11 +1899,13 @@
       document.getElementById('r89_gsiVisual').textContent = gsiVisual;
       document.getElementById('r89_ctrl').textContent = ctrl;
       document.getElementById('r89_vol').textContent = vol;
-      document.getElementById('r89_rqdVal').textContent = Math.round(rqd_pct);
+      document.getElementById('r89_rqdVal').textContent = rqdRating.r89;
       document.getElementById('r89_rqdPct').textContent = rqd_pct.toFixed(0) + '%';
-      document.getElementById('r89_espacProm').textContent = (s.p1_89 || 0).toFixed(2);
-      document.getElementById('r89_espacVal').textContent = espacRating.rating;
-      document.getElementById('r89_condisc').textContent = espacRating.rating;
+      document.getElementById('r89_freq').textContent = freqFrac !== null ? freqFrac.toFixed(2) : '—';
+      document.getElementById('r89_bloque').textContent = tamBloque89 !== null ? tamBloque89.toFixed(2) : '—';
+      document.getElementById('r89_espacProm').textContent = espacProm !== null ? espacProm.toFixed(2) : '—';
+      document.getElementById('r89_espacVal').textContent = espacRating89;
+      document.getElementById('r89_condisc').textContent = condisc89 !== null ? condisc89.toFixed(2) : '—';
       document.getElementById('r89_rmr').textContent = rmr89;
       document.getElementById('r89_ucs').textContent = ucs;
       document.getElementById('r89_is50').textContent = is50;
