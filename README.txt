@@ -14,6 +14,14 @@ CÓMO EJECUTAR
 
 Esto abrirá la aplicación en tu navegador en http://localhost:8501
 
+EJECUCIÓN CON DOCKER COMPOSE
+----------------------------
+Con Docker instalado, ejecuta:
+    docker compose up --build
+
+Luego abre:
+    http://localhost:8501
+
 FUNCIONALIDADES
 ---------------
 - Registro de cabecera: TD2, coordenadas, largo/altura, orientación, litología, mapeador
