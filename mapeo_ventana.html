@@ -116,42 +116,126 @@ tr:last-child td{border-bottom:none;}
     <div class="sec-lbl">📋 Datos de Registro — Identificación de la ventana</div>
     <div class="card">
       <div class="g" style="grid-template-columns:130px 1fr 1fr 130px;gap:8px;margin-bottom:8px;">
-        <div><label class="fl">TD2</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001"/></div>
+        <div><label class="fl">CELDA</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001"/></div>
         <div>
-          <label class="fl">Coordenadas INI (X / Y / Cota)</label>
-          <div class="g3" style="gap:4px;">
-            <input class="fi" id="h_iniX" oninput="onHdr()" placeholder="X"/>
-            <input class="fi" id="h_iniY" oninput="onHdr()" placeholder="Y"/>
-            <input class="fi" id="h_iniC" oninput="onHdr()" placeholder="Cota"/>
-          </div>
-        </div>
-        <div>
-          <label class="fl">Coordenadas FIN (X / Y / Cota)</label>
-          <div class="g3" style="gap:4px;">
-            <input class="fi" id="h_finX" oninput="onHdr()" placeholder="X"/>
-            <input class="fi" id="h_finY" oninput="onHdr()" placeholder="Y"/>
-            <input class="fi" id="h_finC" oninput="onHdr()" placeholder="Cota"/>
-          </div>
-        </div>
+  <label class="fl">Coordenadas INICIALES</label>
+  <div class="g3" style="gap:4px;">
+    
+    <!-- ESTE: 6 enteros + 2 decimales -->
+    <input class="fi"
+           id="h_iniX"
+           placeholder="Este"
+           maxlength="9"
+           oninput="limitarDecimal(this,6,2); onHdr()"/>
+
+    <!-- NORTE: 7 enteros + 2 decimales -->
+    <input class="fi"
+           id="h_iniY"
+           placeholder="Norte"
+           maxlength="10"
+           oninput="limitarDecimal(this,7,2); onHdr()"/>
+
+    <!-- COTA: 4 enteros + 2 decimales -->
+    <input class="fi"
+           id="h_iniC"
+           placeholder="Cota"
+           maxlength="7"
+           oninput="limitarDecimal(this,4,2); onHdr()"/>
+  </div>
+</div>
+
+<div>
+  <label class="fl">Coordenadas FINALES</label>
+  <div class="g3" style="gap:4px;">
+
+    <!-- ESTE -->
+    <input class="fi"
+           id="h_finX"
+           placeholder="Este"
+           maxlength="9"
+           oninput="limitarDecimal(this,6,2); onHdr()"/>
+
+    <!-- NORTE -->
+    <input class="fi"
+           id="h_finY"
+           placeholder="Norte"
+           maxlength="10"
+           oninput="limitarDecimal(this,7,2); onHdr()"/>
+
+    <!-- COTA -->
+    <input class="fi"
+           id="h_finC"
+           placeholder="Cota"
+           maxlength="7"
+           oninput="limitarDecimal(this,4,2); onHdr()"/>
+  </div>
+</div>
+
+<script>
+function limitarDecimal(input, enteros, decimales){
+
+  // Solo números y punto
+  let valor = input.value.replace(/[^0-9.]/g, '');
+
+  // Evitar más de un punto
+  let partes = valor.split('.');
+  if(partes.length > 2){
+    valor = partes[0] + '.' + partes[1];
+  }
+
+  partes = valor.split('.');
+
+  let entero = partes[0] || '';
+  let decimal = partes[1] || '';
+
+  // Limitar enteros
+  entero = entero.slice(0, enteros);
+
+  // Autoagregar punto al completar enteros
+  if(entero.length === enteros && !valor.includes('.')){
+    valor = entero + '.';
+  }else{
+
+    // Limitar decimales
+    decimal = decimal.slice(0, decimales);
+
+    valor = decimal !== ''
+      ? entero + '.' + decimal
+      : entero;
+  }
+
+  // Validación final de decimales
+  if(valor.includes('.')){
+    let p = valor.split('.');
+    p[1] = (p[1] || '').slice(0, decimales);
+    valor = p[0] + '.' + p[1];
+  }
+
+  input.value = valor;
+}
+</script>
         <div><label class="fl">Mapeador</label><input class="fi" id="h_mapeador" oninput="onHdr()" placeholder="Iniciales"/></div>
       </div>
       <div class="g g12" style="gap:6px;margin-bottom:8px;">
         <div><label class="fl">Largo (m)</label><input class="fi" id="h_largo" oninput="onHdr()" value="10" type="number" min="0"/></div>
         <div><label class="fl">Altura (m)</label><input class="fi" id="h_altura" oninput="onHdr()" value="15" type="number" min="0"/></div>
-        <div><label class="fl">Dip Taled°</label><input class="fi" id="h_dipT" oninput="onHdr()"/></div>
-        <div><label class="fl">DipDir Tale°</label><input class="fi" id="h_dipdirT" oninput="onHdr()"/></div>
+        <div><label class="fl">Dip Talud°</label><input class="fi" id="h_dipT" type="number" min="0" max="90" oninput="validarGrados(this, 0, 90); onHdr()"/></div>
+        <div><label class="fl">Dip-Dir Talud°</label><input class="fi" id="h_dipdirT" type="number" min="0" max="360" oninput="validarGrados(this, 0, 360); onHdr()"/></div>
         <div><label class="fl">Dip Hole</label><input class="fi" id="h_dipH" oninput="onHdr()"/></div>
         <div><label class="fl">Az Hole</label><input class="fi" id="h_azH" oninput="onHdr()"/></div>
-        <div><label class="fl">LITO-3</label><input class="fi" id="h_lito3" oninput="onHdr()"/></div>
-        <div><label class="fl">LMT_M</label><input class="fi" id="h_lmtM" oninput="onHdr()"/></div>
+        <div><label class="fl">LITO-1</label>
+          <select class="fs" id="h_lito1" onchange="onLito1Change()">
+            <option value="">-- seleccionar unidad --</option>
+          </select>
+        </div>
+        <div><label class="fl">LITO-2</label><input class="fi" id="h_lito2" oninput="onHdr()" readonly/></div>
+        <div><label class="fl">LITO-3</label><input class="fi" id="h_lito3" oninput="onHdr()" readonly/></div>
+        <div><label class="fl">GRUPO</label><input class="fi" id="h_lmtM" oninput="onHdr()"/></div>
         <div><label class="fl">Sector</label><input class="fi" id="h_sector" oninput="onHdr()"/></div>
-        <div><label class="fl">Este</label><input class="fi" id="h_este" oninput="onHdr()"/></div>
         <div><label class="fl">Fase</label><input class="fi" id="h_fase" oninput="onHdr()"/></div>
         <div><label class="fl">Nivel</label><input class="fi" id="h_nivel" oninput="onHdr()"/></div>
-      </div>
-      <div class="g g4" style="gap:6px;">
-        <div><label class="fl">Sect. GEOT</label><input class="fi" id="h_sectG" oninput="onHdr()"/></div>
-        <div>
+        <div style="grid-column: span 2;"><label class="fl">Sect. GEOT</label><input class="fi" id="h_sectG" oninput="onHdr()"/></div>
+        <div style="grid-column: span 2;">
           <label class="fl">Intemperismo</label>
           <select class="fs" id="h_intemp" onchange="onHdr()">
             <option value="">-- seleccionar --</option>
@@ -163,7 +247,8 @@ tr:last-child td{border-bottom:none;}
             <option value="s">s — Suelo residual</option>
           </select>
         </div>
-        <div><label class="fl">Alteración de Zona</label><input class="fi" id="h_altZona" oninput="onHdr()" placeholder="e.g. Propilítica"/></div>
+        <div style="grid-column: span 2;"><label class="fl">Alteración de Zona</label><input class="fi" id="h_altZona" oninput="onHdr()" placeholder="e.g. Propilítica"/></div>
+        <div><label class="fl">Fecha</label><input class="fi" id="h_fecha" type="date" oninput="onHdr()"/></div>
       </div>
     </div>
   </div>
@@ -289,6 +374,52 @@ const FORMA_EST=[
 ];
 
 // ═══════════════════════════════════════════════════════
+// CLASIFICACIÓN LITOLÓGICA
+// ═══════════════════════════════════════════════════════
+const CLASIFICACION_LITOLOGICA = [
+  // Rocas Intrusivas
+  {grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_EQ"},
+  {grupo: "INTRUSIVOS", unidad: "MZB", litologia: "MZB", codigo: "MZB_P"},
+  {grupo: "INTRUSIVOS", unidad: "MBF1", litologia: "MBF", codigo: "MBF1"},
+  {grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF2"},
+  {grupo: "INTRUSIVOS", unidad: "MBF2", litologia: "MBF", codigo: "MBF_P"},
+  {grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_F"},
+  {grupo: "INTRUSIVOS", unidad: "MZM", litologia: "MZM", codigo: "MZM_M"},
+  {grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_1"},
+  {grupo: "INTRUSIVOS", unidad: "MZH", litologia: "MZH", codigo: "MZH_2"},
+  {grupo: "INTRUSIVOS", unidad: "MZD", litologia: "MZD", codigo: "MZD"},
+  {grupo: "INTRUSIVOS", unidad: "MZQ", litologia: "MZQ", codigo: "MZQ"},
+  {grupo: "INTRUSIVOS", unidad: "AN", litologia: "LAM", codigo: "LAM"},
+  
+  // Rocas Sedimentarias
+  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_M"},
+  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_Mg"},
+  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_S"},
+  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_C"},
+  {grupo: "SEDIMENTARIOS", unidad: "LMT", litologia: "LMT", codigo: "LMT_U"},
+  {grupo: "SEDIMENTARIOS", unidad: "SHL", litologia: "HFL", codigo: "SHL_MA"},
+  
+  // Rocas Metamórficas
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "GSK", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "PSK", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MSK", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "ESK", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBC", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "LMT", litologia: "MBL", codigo: "Varios"},
+  {grupo: "METAMORFICAS", unidad: "SHL", litologia: "HFL", codigo: "-"},
+  {grupo: "METAMORFICAS", unidad: "SND", litologia: "QZT", codigo: "-"},
+  
+  // Brechas
+  {grupo: "BRECHAS", unidad: "TBX", litologia: "TBX", codigo: "TBX"},
+  {grupo: "BRECHAS", unidad: "HBX", litologia: "HBX", codigo: "HBX"},
+  {grupo: "BRECHAS", unidad: "MBX / varios", litologia: "MBX", codigo: "MBX"},
+  
+  // Endoskarn
+  {grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EPG", codigo: "-"},
+  {grupo: "ENDOSKARN", unidad: "Intrusivo", litologia: "EGT", codigo: "-"}
+];
+
+// ═══════════════════════════════════════════════════════
 // CÁLCULOS
 // ═══════════════════════════════════════════════════════
 function getRelleno(code,esp){
@@ -375,9 +506,9 @@ function getHdr(){
     td2:v("h_td2"),iniX:v("h_iniX"),iniY:v("h_iniY"),iniC:v("h_iniC"),
     finX:v("h_finX"),finY:v("h_finY"),finC:v("h_finC"),largo:v("h_largo"),
     altura:v("h_altura"),dipT:v("h_dipT"),dipdirT:v("h_dipdirT"),
-    dipH:v("h_dipH"),azH:v("h_azH"),lito3:v("h_lito3"),lmtM:v("h_lmtM"),
-    sector:v("h_sector"),este:v("h_este"),fase:v("h_fase"),nivel:v("h_nivel"),
-    sectG:v("h_sectG"),intemp:v("h_intemp"),altZona:v("h_altZona"),mapeador:v("h_mapeador"),
+    dipH:v("h_dipH"),azH:v("h_azH"),lito1:v("h_lito1"),lito2:v("h_lito2"),lito3:v("h_lito3"),lmtM:v("h_lmtM"),
+    sector:v("h_sector"),fase:v("h_fase"),nivel:v("h_nivel"),
+    sectG:v("h_sectG"),intemp:v("h_intemp"),altZona:v("h_altZona"),fecha:v("h_fecha"),mapeador:v("h_mapeador"),
   };
 }
 function v(id){const e=document.getElementById(id);return e?e.value:"";}
@@ -391,6 +522,81 @@ function loadHdrToForm(){
 }
 
 function onHdr(){saveHdr();renderSummary();}
+
+// ═══════════════════════════════════════════════════════
+// FUNCIONES DE VALIDACIÓN
+// ═══════════════════════════════════════════════════════
+function validarGrados(input, min, max) {
+  let valor = parseFloat(input.value);
+  
+  if (isNaN(valor)) {
+    input.value = '';
+    return;
+  }
+  
+  // Corregir valor si está fuera de rango
+  if (valor < min) {
+    valor = min;
+    input.value = valor;
+  } else if (valor > max) {
+    valor = max;
+    input.value = valor;
+  }
+  
+  // Para Dip-Dir Talud°, si es 360, cambiar a 0
+  if (max === 360 && valor === 360) {
+    input.value = 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FUNCIONES LITOLÓGICAS
+// ═══════════════════════════════════════════════════════
+function populateLito1Dropdown() {
+  const select = document.getElementById('h_lito1');
+  const unidades = [...new Set(CLASIFICACION_LITOLOGICA.map(item => item.unidad))].sort();
+  
+  unidades.forEach(unidad => {
+    const option = document.createElement('option');
+    option.value = unidad;
+    option.textContent = unidad;
+    select.appendChild(option);
+  });
+}
+
+function onLito1Change() {
+  const unidadSeleccionada = document.getElementById('h_lito1').value;
+  const litologiaInput = document.getElementById('h_lito2');
+  const codigoInput = document.getElementById('h_lito3');
+  const grupoInput = document.getElementById('h_lmtM');
+  
+  if (!unidadSeleccionada) {
+    litologiaInput.value = '';
+    codigoInput.value = '';
+    grupoInput.value = '';
+    onHdr();
+    return;
+  }
+  
+  // Buscar todas las entradas que coincidan con la unidad seleccionada
+  const entradas = CLASIFICACION_LITOLOGICA.filter(item => item.unidad === unidadSeleccionada);
+  
+  if (entradas.length > 0) {
+    // Tomar la primera entrada para autocompletar
+    const entrada = entradas[0];
+    litologiaInput.value = entrada.litologia;
+    codigoInput.value = entrada.codigo;
+    grupoInput.value = entrada.grupo;
+    
+    // Si hay múltiples entradas con la misma unidad pero diferentes litologías/códigos
+    // podemos mostrar un mensaje o permitir selección adicional
+    if (entradas.length > 1) {
+      console.log(`Múltiples opciones para ${unidadSeleccionada}:`, entradas);
+    }
+  }
+  
+  onHdr();
+}
 
 // ═══════════════════════════════════════════════════════
 // TABLE RENDER
@@ -582,6 +788,7 @@ function showTab(key,btn){
 // INIT
 // ═══════════════════════════════════════════════════════
 loadHdrToForm();
+populateLito1Dropdown();
 renderTable();
 renderSummary();
 saveHdr();
