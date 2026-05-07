@@ -659,14 +659,11 @@ function renderSummary(){
     <div>
       <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">
         PROMEDIOS
-        <span style="margin-left:10px;color:var(--or);font-size:10px;">■ RMR'89</span>
-        <span style="margin-left:8px;color:var(--pk);font-size:10px;">■ RMR'76</span>
       </div>
-      ${[["PROM 1 (todos)",s.p1_89,s.p1_76],["PROM 2 (x familia)",s.p2_89,s.p2_76],["PROM 3 (peor familia)",s.p3_89,s.p3_76]].map(([lbl,v89,v76])=>`
+      ${[["PROM 1:",s.p1_89],["PROM 2:",s.p2_89],["PROM 3:",s.p3_89]].map(([lbl,val])=>`
       <div class="stat-row">
         <span class="stat-lbl">${lbl}</span>
-        <span class="stat-v sv89">${fmt(v89)}</span>
-        <span class="stat-v sv76">${fmt(v76)}</span>
+        <span class="stat-v" style="background:var(--bg3);color:var(--mu);border:1px solid var(--bd);">${fmt(val)}</span>
       </div>`).join("")}
     </div>
     <div>
