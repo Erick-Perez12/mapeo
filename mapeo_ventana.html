@@ -518,6 +518,22 @@
       color: var(--mu);
     }
 
+    .rmr-table .white-mu {
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+    }
+
+    .highlight-purple {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: #ddd6fe !important;
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+    
+    input.highlight-purple:focus {
+      background: rgba(139, 92, 246, 0.25) !important;
+      border-color: #a78bfa !important;
+    }
+
     .rmr-table td.yellow {
       background: rgba(255, 214, 0, 0.05);
       color: #fef3c7;
@@ -562,6 +578,11 @@
       color: #fff;
     }
 
+    .rb-rqd {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #fff;
+    }
+
     .rmr-final {
       font-weight: 900;
       font-size: 15px;
@@ -576,6 +597,83 @@
     .rf89 {
       color: #ffe082;
       text-shadow: 0 0 10px rgba(249, 168, 37, 0.3);
+    }
+
+    /* Photo Upload Styles */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .photo-box {
+      aspect-ratio: 1 / 1;
+      background: rgba(0, 0, 0, 0.2);
+      border: 2px dashed var(--bd);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .photo-box:hover {
+      border-color: var(--am);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-box .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--mu);
+    }
+
+    .photo-box .placeholder i {
+      font-size: 24px;
+    }
+
+    .photo-box .placeholder span {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .photo-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      background: rgba(239, 68, 68, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .photo-box:hover .photo-remove {
+      opacity: 1;
     }
 
     /* modal */
@@ -744,7 +842,7 @@
       <div class="sec-lbl">📋 Datos de Registro — Identificación de la ventana</div>
       <div class="card">
         <div class="g" style="grid-template-columns:130px 1fr 1fr 130px;gap:8px;margin-bottom:8px;">
-          <div><label class="fl">CELDA</label><input class="fi" id="h_td2" oninput="onHdr()" placeholder="TD2-001" />
+          <div><label class="fl">CELDA</label><input class="fi highlight-purple" id="h_td2" oninput="onHdr()" placeholder="TD2-001" />
           </div>
           <div>
             <label class="fl">Coordenadas INICIALES</label>
@@ -825,7 +923,7 @@
               input.value = valor;
             }
           </script>
-          <div><label class="fl">Mapeador</label><input class="fi" id="h_mapeador" oninput="onHdr()"
+          <div><label class="fl">Mapeador</label><input class="fi highlight-purple" id="h_mapeador" oninput="onHdr()"
               placeholder="Iniciales" /></div>
         </div>
         <div class="g g12" style="gap:6px;margin-bottom:8px;">
@@ -997,15 +1095,15 @@
           </div>
           <div>
             <label class="fl">Estruc.</label>
-            <input class="fi" id="r_gsiEstruc" value="VB" onchange="recalcRMR()">
+            <input class="fi highlight-purple" id="r_gsiEstruc" value="VB" onchange="recalcRMR()">
           </div>
           <div>
             <label class="fl">GSI Vis.</label>
-            <input class="fi" type="number" id="r_gsiVisual" value="56" onchange="recalcRMR()">
+            <input class="fi highlight-purple" type="number" id="r_gsiVisual" value="56" onchange="recalcRMR()">
           </div>
           <div>
             <label class="fl">Ctrl. Est.</label>
-            <input class="fi" type="number" id="r_ctrl" value="3" onchange="recalcRMR()">
+            <input class="fi highlight-purple" type="number" id="r_ctrl" value="3" onchange="recalcRMR()">
           </div>
           <div>
             <label class="fl">Ef. Vol.</label>
@@ -1015,6 +1113,10 @@
 
         <!-- Result Badges -->
         <div style="display:flex;gap:16px;margin-bottom:16px;justify-content:center;">
+          <div class="rmr-badge rb-rqd">
+            <span style="font-size:10px;opacity:0.9;">RQD%</span>
+            <span id="rqd_badge_val" style="font-size:20px;">—</span>
+          </div>
           <div class="rmr-badge rb76">
             <span style="font-size:10px;opacity:0.9;">RMR'76</span>
             <span id="rmr76_val" style="font-size:20px;">—</span>
@@ -1035,11 +1137,11 @@
                 <th class="yellow">Valor Agua</th>
                 <th class="yellow">Resistencia</th>
                 <th class="yellow">Val Resist.</th>
-                <th class="gray">Cond. SUP</th>
-                <th class="gray">Estruc. GSI</th>
-                <th class="gray">GSI Visual</th>
-                <th class="gray">Ctrl. Estruc.</th>
-                <th class="gray">Ef. Voladura</th>
+                <th class="white-mu">Cond. SUP</th>
+                <th class="highlight-purple">Estruc. GSI</th>
+                <th class="highlight-purple">GSI Visual</th>
+                <th class="highlight-purple">Ctrl. Estruc.</th>
+                <th class="white-mu">Ef. Voladura</th>
                 <th class="orange">RQD Valor</th>
                 <th class="orange">RQD (%)</th>
                 <th class="blue">Frec. Frac.</th>
@@ -1059,11 +1161,11 @@
                 <td class="yellow" id="r76_aguaVal">—</td>
                 <td class="yellow" id="r76_resist">—</td>
                 <td class="yellow" id="r76_resistVal">—</td>
-                <td id="r76_gsiCond">—</td>
-                <td id="r76_gsiEstruc">—</td>
-                <td id="r76_gsiVisual">—</td>
-                <td id="r76_ctrl">—</td>
-                <td id="r76_vol">—</td>
+                <td class="white-mu" id="r76_gsiCond">—</td>
+                <td class="highlight-purple" id="r76_gsiEstruc">—</td>
+                <td class="highlight-purple" id="r76_gsiVisual">—</td>
+                <td class="highlight-purple" id="r76_ctrl">—</td>
+                <td class="white-mu" id="r76_vol">—</td>
                 <td class="orange" id="r76_rqdVal">—</td>
                 <td class="orange" id="r76_rqdPct">—</td>
                 <td id="r76_freq">—</td>
@@ -1081,11 +1183,11 @@
                 <td class="yellow" id="r89_aguaVal">—</td>
                 <td class="yellow" id="r89_resist">—</td>
                 <td class="yellow" id="r89_resistVal">—</td>
-                <td id="r89_gsiCond">—</td>
-                <td id="r89_gsiEstruc">—</td>
-                <td id="r89_gsiVisual">—</td>
-                <td id="r89_ctrl">—</td>
-                <td id="r89_vol">—</td>
+                <td class="white-mu" id="r89_gsiCond">—</td>
+                <td class="highlight-purple" id="r89_gsiEstruc">—</td>
+                <td class="highlight-purple" id="r89_gsiVisual">—</td>
+                <td class="highlight-purple" id="r89_ctrl">—</td>
+                <td class="white-mu" id="r89_vol">—</td>
                 <td class="orange" id="r89_rqdVal">—</td>
                 <td class="orange" id="r89_rqdPct">—</td>
                 <td id="r89_freq">—</td>
@@ -1099,6 +1201,26 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Photo Section -->
+        <div class="photo-grid">
+          <div class="photo-box" onclick="triggerUpload(1)" id="pbox_1">
+            <div class="placeholder" id="p_ph_1">
+              <span style="font-size:24px;">📸</span>
+              <span>Cargar Foto 1</span>
+            </div>
+            <button class="photo-remove" onclick="removePhoto(event, 1)" id="p_rm_1" style="display:none;">×</button>
+            <input type="file" id="p_file_1" accept="image/*" style="display:none;" onchange="handlePhoto(this, 1)">
+          </div>
+          <div class="photo-box" onclick="triggerUpload(2)" id="pbox_2">
+            <div class="placeholder" id="p_ph_2">
+              <span style="font-size:24px;">📸</span>
+              <span>Cargar Foto 2</span>
+            </div>
+            <button class="photo-remove" onclick="removePhoto(event, 2)" id="p_rm_2" style="display:none;">×</button>
+            <input type="file" id="p_file_2" accept="image/*" style="display:none;" onchange="handlePhoto(this, 2)">
+          </div>
         </div>
 
         <!-- Formula Bar -->
@@ -1585,7 +1707,7 @@
       let html = `<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
     <div>
       <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">
-        PROMEDIOS ESPACIAMIENTO
+        PROMEDIOS POR FAMILIA
       </div>
       ${[["PROM 1:", s.prom1], ["PROM 2:", s.prom2], ["PROM 3:", s.prom3]].map(([lbl, val]) => `
       <div class="stat-row">
@@ -1601,25 +1723,7 @@
         <span style="font-size:10px;color:var(--mu);">jts/m³</span>
       </div>
     </div>`;
-      if (s.fs.length) {
-        html += `<div>
-      <div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:8px;">POR FAMILIA</div>
-      <table style="font-size:11px;border-collapse:collapse;">
-        <tr style="border-bottom:1px solid var(--bd);">
-          <th style="text-align:left;padding-right:12px;color:var(--mu);">Fam</th>
-          <th style="padding-right:10px;color:var(--mu);">N</th>
-          <th style="padding-right:8px;color:var(--pk);">Avg 89</th>
-          <th style="color:var(--or);">Avg 76</th>
-        </tr>
-        ${s.fs.map(f => `<tr style="border-bottom:1px solid rgba(51,65,85,.4);">
-          <td style="padding-right:12px;color:var(--am);font-weight:700;padding-top:4px;">${f.fam}</td>
-          <td style="padding-right:10px;color:var(--mu);text-align:center;">${f.n}</td>
-          <td style="padding-right:8px;color:var(--pk);text-align:center;font-family:monospace;">${f.a89 !== null ? f.a89.toFixed(1) : "—"}</td>
-          <td style="color:var(--or);text-align:center;font-family:monospace;">${f.a76 !== null ? f.a76.toFixed(1) : "—"}</td>
-        </tr>`).join("")}
-      </table>
-    </div>`;
-      }
+
       html += "</div>";
       document.getElementById("summary-card").innerHTML = html;
     }
@@ -1868,6 +1972,7 @@
       // Update display values
       document.getElementById('rmr76_val').textContent = rmr76;
       document.getElementById('rmr89_val').textContent = rmr89;
+      document.getElementById('rqd_badge_val').textContent = rqd_pct.toFixed(0) + '%';
 
       // Update table values
       document.getElementById('r76_agua').textContent = agua;
@@ -1916,6 +2021,54 @@
       const p3 = s.p3_89 || 0;
       document.getElementById('rmr_formula').innerHTML =
         `**Jv** = (1/${p1.toFixed(3)}) + (1/${p2.toFixed(3)}) + (1/${p3.toFixed(3)}) = **${jv.toFixed(3)}** | **RQD%** = 115 − 3.3 × ${jv.toFixed(2)} = **${rqd_pct.toFixed(1)}%**`;
+    }
+
+    // Photo Handlers
+    function triggerUpload(n) {
+      document.getElementById(`p_file_${n}`).click();
+    }
+
+    function handlePhoto(input, n) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const box = document.getElementById(`pbox_${n}`);
+          const ph = document.getElementById(`p_ph_${n}`);
+          const rm = document.getElementById(`p_rm_${n}`);
+
+          // Remove existing img if any
+          const oldImg = box.querySelector('img');
+          if (oldImg) oldImg.remove();
+
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          box.appendChild(img);
+
+          ph.style.display = 'none';
+          rm.style.display = 'flex';
+
+          // Optional: Save to localStorage (Careful with size)
+          // try { localStorage.setItem(`mw_photo_${n}`, e.target.result); } catch(err) { console.warn("Photo too large for storage"); }
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function removePhoto(event, n) {
+      event.stopPropagation();
+      const box = document.getElementById(`pbox_${n}`);
+      const ph = document.getElementById(`p_ph_${n}`);
+      const rm = document.getElementById(`p_rm_${n}`);
+      const file = document.getElementById(`p_file_${n}`);
+
+      const img = box.querySelector('img');
+      if (img) img.remove();
+
+      ph.style.display = 'flex';
+      rm.style.display = 'none';
+      file.value = '';
+
+      // localStorage.removeItem(`mw_photo_${n}`);
     }
 
     // ═══════════════════════════════════════════════════════
