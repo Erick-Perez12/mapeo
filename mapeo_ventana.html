@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
@@ -175,21 +175,22 @@ tr:last-child td{border-bottom:none;}
       <table id="data-table">
         <thead>
           <tr>
-            <th style="position:sticky;left:0;background:#0c1525;z-index:9;">Fam</th>
-            <th>Dist<br/>(m)</th><th>Dip<br/>(°)</th><th>DipDir<br/>(°)</th>
-            <th>Tipo Estr.</th><th>N°<br/>Estr.</th><th>Abertura</th>
-            <th>Espesor</th><th>Continuidad</th><th>Espac.<br/>(m)</th>
-            <th>N°<br/>Ext.</th><th>Term.</th>
-            <th>Relleno 1</th><th>Relleno 2</th>
-            <th>R1</th><th>R2</th>
-            <th>JRC</th><th>Rugos.</th><th>Forma</th><th>Alter.</th>
+            <th style="position:sticky;left:0;background:#0c1525;z-index:9;">ID Fam</th>
+            <th>Dist_Estruct<br/>(m)</th><th>Dip_Estruct</th><th>DipDir_Estruct</th>
+            <th>Tipo_Estruct.</th><th>N°<br/>Estruct</th><th>Abertura(mm)</th>
+            <th>Espesor(mm)</th><th>Continuidad(m)</th><th>Espacionamiento<br/>(m)</th>
+            <th>N°<br/>Extremos visibles.</th><th>Terminacion</th>
+            <th>T. Relleno 1</th><th>T. Relleno 2</th>
+            <th style="color:var(--or);">V. R1</th><th style="color:var(--or);">V. R2</th>
+            <th style="color:var(--pk);">V. R1</th><th style="color:var(--pk);">V. R2</th>
+            <th>JRC</th><th>Rugosidad<br/>Estruct.</th><th>Forma<br/>Estruct.</th><th>Alteracion<br/>Estruct.</th>
             <th class="th89" colspan="6">Condición Discontinuidades (RMR'89)</th>
             <th class="th76" colspan="6">Condición Discontinuidades (RMR'76)</th>
             <th></th>
           </tr>
           <tr id="subhdr" style="background:#090f1c;font-size:10px;">
             <th style="position:sticky;left:0;background:#090f1c;z-index:9;"></th>
-            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
             <th class="th89">Alt</th><th class="th89">Rel</th><th class="th89">Cont</th><th class="th89">Aber</th><th class="th89">Rug</th><th class="th89">Val</th>
             <th class="th76">Alt</th><th class="th76">Rel</th><th class="th76">Cont</th><th class="th76">Aber</th><th class="th76">Rug</th><th class="th76">Val</th>
             <th></th>
@@ -198,16 +199,20 @@ tr:last-child td{border-bottom:none;}
         <tbody id="tbl-body"></tbody>
       </table>
       <div class="add-bar">
-        <span style="font-size:10px;color:var(--mu);">Agregar fila a familia:</span>
-        <button class="btn-fam btn-sm" onclick="addRow('1')">1</button>
-        <button class="btn-fam btn-sm" onclick="addRow('2')">2</button>
-        <button class="btn-fam btn-sm" onclick="addRow('3')">3</button>
-        <button class="btn-fam btn-sm" onclick="addRow('4')">4</button>
-        <button class="btn-fam btn-sm" onclick="addRow('5')">5</button>
-        <button class="btn-fam btn-sm" onclick="addRow('6')">6</button>
-        <button class="btn-fam btn-sm" onclick="addRow('7')">7</button>
-        <button class="btn-fam btn-sm" onclick="addRow('8')">8</button>
-        <button class="btn-fam btn-sm" onclick="addRow('9')">9</button>
+        <span style="font-size:10px;color:var(--mu);">Crear Familia:</span>
+        <!-- <select id="fam-control" class="ts" style="width:60px;">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select> -->
+        <button class="btn-fam btn-sm" type="button" title="Agregar fila" onclick="addRowFromControl()">+</button>
+        <button class="btn-fam btn-sm" type="button" title="Eliminar ultima fila de la familia" onclick="removeLastRowFromControl()">-</button>
       </div>
     </div>
   </div>
@@ -288,6 +293,10 @@ const FORMA_EST=[
   {code:"E",desc:"Escalonada"},{code:"I",desc:"Irregular"},
 ];
 
+const EST_EXTRE=[
+  {code:"0",desc:"No se ven"},{code:"1",desc:"Solo vemos uno"},{code:"2",desc:"Se ven en dos extremos visibles"},
+  {code:"3",desc:"Terminacion entre estructuras"},
+];
 // ═══════════════════════════════════════════════════════
 // CÁLCULOS
 // ═══════════════════════════════════════════════════════
@@ -305,18 +314,95 @@ function getRelleno(code,esp){
   }
   return[null,null];
 }
+function cleanDecimalInput(val){
+  const raw=String(val??"").replace(/\./g,",").replace(/[^\d,]/g,"");
+  const parts=raw.split(",");
+  const enteros=(parts[0]||"").slice(0,2);
+  const decimales=(parts[1]||"").slice(0,2);
+  return raw.includes(",")?`${enteros},${decimales}`:enteros;
+}
+function parseDecimalInput(val){
+  if(val===null||val===undefined||val==="")return NaN;
+  const n=Number(String(val).replace(",","."));
+  return Number.isFinite(n)?n:NaN;
+}
+function updateDecimalInput(el,id,key){
+  const limpio=cleanDecimalInput(el.value);
+  el.value=limpio;
+  const r=rows.find(x=>x.id===id);
+  if(r){
+    r[key]=limpio;
+    saveRows();
+  }
+}
+function commitDecimalInput(id,key,val){
+  updRow(id,key,cleanDecimalInput(val));
+}
+function cleanIntegerInput(val,min,max){
+  const soloDigitos=String(val??"").replace(/\D/g,"");
+  if(soloDigitos==="")return "";
+  const n=Math.min(max,Math.max(min,parseInt(soloDigitos,10)));
+  return String(n);
+}
+function updateIntegerInput(el,id,key,min,max){
+  const limpio=cleanIntegerInput(el.value,min,max);
+  el.value=limpio;
+  const r=rows.find(x=>x.id===id);
+  if(r){
+    r[key]=limpio;
+    saveRows();
+  }
+}
+function commitIntegerInput(id,key,val,min,max){
+  updRow(id,key,cleanIntegerInput(val,min,max));
+}
+function setExtreSelectMode(el,expanded){
+  if(!el)return;
+  [...el.options].forEach(opt=>{
+    if(opt.value===""){
+      opt.textContent="—";
+      return;
+    }
+    const item=EST_EXTRE.find(x=>x.code===opt.value);
+    if(item)opt.textContent=expanded?`${item.code}. ${item.desc}`:item.code;
+  });
+}
+function getAberturaCode(val){
+  const n=parseDecimalInput(val);
+  if(isNaN(n))return "";
+  if(n===0)return "0";
+  if(n<0.1)return "0.000001";
+  if(n<1)return "0.1";
+  if(n<=5)return "1";
+  return "5";
+}
+function getEspesorCode(val){
+  const n=parseDecimalInput(val);
+  if(isNaN(n))return "";
+  return n<5?"1":"2";
+}
+function getContinuidadCode(val){
+  const n=parseDecimalInput(val);
+  if(isNaN(n))return "";
+  if(n<1)return "0";
+  if(n<3)return "1";
+  if(n<10)return "3";
+  if(n<=20)return "10";
+  return "20";
+}
 function calcRow(row){
+  const espCode=getEspesorCode(row.esp);
   const alt=ALTERACION.find(x=>x.code===row.alt);
   const a89=alt?alt.r89:null, a76=alt?alt.r76:null;
-  const[r1_89,r1_76]=getRelleno(row.r1,row.esp);
-  const[r2_89,r2_76]=getRelleno(row.r2,row.esp);
+  const[r1_89,r1_76]=getRelleno(row.r1,espCode);
+  const[r2_89,r2_76]=getRelleno(row.r2,espCode);
   let rel89=null,rel76=null;
   if(r1_89!==null&&r2_89!==null){rel89=Math.min(r1_89,r2_89);rel76=Math.min(r1_76,r2_76);}
   else if(r1_89!==null){rel89=r1_89;rel76=r1_76;}
   else if(r2_89!==null){rel89=r2_89;rel76=r2_76;}
-  const c=CONTINUIDAD.find(x=>x.code===row.cont);
+  const c=CONTINUIDAD.find(x=>x.code===getContinuidadCode(row.cont));
   const co89=c?c.r89:null,co76=c?c.r76:null;
-  const ab=ABERTURA.find(x=>x.code===row.aber);
+  const ab=ABERTURA.find(x=>x.code===getAberturaCode(row.aber));
   const ab89=ab?ab.r89:null,ab76=ab?ab.r76:null;
   const rp=RUGOSIDAD[row.rug];
   const rug89=rp?rp[0]:null,rug76=rp?rp[1]:null;
@@ -324,7 +410,7 @@ function calcRow(row){
   const vs76=[a76,rel76,co76,ab76,rug76];
   const v89=vs89.every(v=>v!==null)?vs89.reduce((a,b)=>a+b,0):null;
   const v76=vs76.every(v=>v!==null)?vs76.reduce((a,b)=>a+b,0):null;
-  return{a89,a76,rel89,rel76,co89,co76,ab89,ab76,rug89,rug76,v89,v76,r1_89,r2_89};
+  return{a89,a76,rel89,rel76,co89,co76,ab89,ab76,rug89,rug76,v89,v76,r1_89,r1_76,r2_89,r2_76};
 }
 function calcSummary(){
   const fams=[...new Set(rows.map(r=>r.fam))].sort();
@@ -333,7 +419,7 @@ function calcSummary(){
     const fr=rows.filter(r=>r.fam===f);
     const v89=fr.map(r=>calcRow(r).v89).filter(v=>v!==null);
     const v76=fr.map(r=>calcRow(r).v76).filter(v=>v!==null);
-    const sps=fr.map(r=>parseFloat(r.espac)).filter(v=>!isNaN(v)&&v>0);
+    const sps=fr.map(r=>parseDecimalInput(r.espac)).filter(v=>!isNaN(v)&&v>0);
     if(sps.length){const ms=sps.reduce((a,b)=>a+b,0)/sps.length;jv+=1/ms;}
     return{fam:f,n:fr.length,a89:v89.length?v89.reduce((a,b)=>a+b,0)/v89.length:null,a76:v76.length?v76.reduce((a,b)=>a+b,0)/v76.length:null};
   });
@@ -408,31 +494,31 @@ function selOpts(opts,val,emptyLabel="—"){
 function makeRow(row,idx){
   const rt=calcRow(row);
   const bg=FAM_BG[(parseInt(row.fam)||1)-1];
-  const largoMax=parseFloat(v("h_largo"))||999;
-  const distErr=row.dist!==""&&parseFloat(row.dist)>largoMax;
+  const largoMax=parseDecimalInput(v("h_largo"))||999;
+  const distErr=row.dist!==""&&parseDecimalInput(row.dist)>largoMax;
   const d=(val,cls="")=>val!==null&&val!==undefined?`<td class="${cls}">${val}</td>`:`<td class="${cls}" style="color:var(--mu)">—</td>`;
   return `<tr id="tr_${row.id}" style="background:${bg};border-bottom:1px solid var(--bd);">
     <td style="position:sticky;left:0;background:${bg};z-index:5;">
-      <select class="ts" style="width:36px;color:var(--am);font-weight:700;background:transparent;" onchange="updRow('${row.id}','fam',this.value)">
-        ${[1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}"${row.fam===String(n)?" selected":""}>${n}</option>`).join("")}
-      </select>
+      <input class="ti" value="${row.fam}" type="text" inputmode="numeric" maxlength="1" style="width:36px;color:var(--am);font-weight:700;background:transparent;" oninput="updateIntegerInput(this,'${row.id}','fam',1,9)" onchange="commitIntegerInput('${row.id}','fam',this.value,1,9)"/>
     </td>
-    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="number" min="0" step="0.5" style="width:46px" title="${distErr?`Excede ${largoMax}m`:""}" onchange="updRow('${row.id}','dist',this.value)"/></td>
-    <td><input class="ti" value="${row.dip}" type="number" min="0" max="90" style="width:38px" onchange="updRow('${row.id}','dip',this.value)"/></td>
-    <td><input class="ti" value="${row.dipdir}" type="number" min="0" max="360" style="width:42px" onchange="updRow('${row.id}','dipdir',this.value)"/></td>
-    <td><select class="ts" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t=>({code:t.code,label:t.code})),row.tipo,"JN")}</select></td>
-    <td><input class="ti" value="${row.nstr}" type="number" min="1" style="width:34px" onchange="updRow('${row.id}','nstr',this.value)"/></td>
-    <td><select class="ts" style="width:100px" onchange="updRow('${row.id}','aber',this.value)">${selOpts(ABERTURA,row.aber)}</select></td>
-    <td><select class="ts" style="width:64px" onchange="updRow('${row.id}','esp',this.value)">${selOpts(ESPESOR,row.esp)}</select></td>
-    <td><select class="ts" style="width:76px" onchange="updRow('${row.id}','cont',this.value)">${selOpts(CONTINUIDAD,row.cont)}</select></td>
-    <td><input class="ti" value="${row.espac}" type="number" min="0" step="0.01" style="width:44px" onchange="updRow('${row.id}','espac',this.value)"/></td>
-    <td><input class="ti" value="${row.next}" type="number" min="0" max="2" style="width:34px" onchange="updRow('${row.id}','next',this.value)"/></td>
-    <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','term',this.value)"><option value="">—</option><option value="R"${row.term==="R"?" selected":""}>R</option><option value="D"${row.term==="D"?" selected":""}>D</option><option value="S"${row.term==="S"?" selected":""}>S</option></select></td>
-    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r1',this.value)">${selOpts(RELLENO.map(r=>({code:r.code,label:r.code})),row.r1)}</select></td>
+    <td><input class="ti${distErr?" err":""}" value="${row.dist}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:46px" title="${distErr?`Excede ${largoMax}m`:""}" oninput="updateDecimalInput(this,'${row.id}','dist')" onchange="commitDecimalInput('${row.id}','dist',this.value)"/></td>
+    <td><input class="ti" value="${row.dip}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','dip',0,90)" onchange="commitIntegerInput('${row.id}','dip',this.value,0,90)"/></td>
+    <td><input class="ti" value="${row.dipdir}" type="text" inputmode="numeric" maxlength="3" style="width:42px" oninput="updateIntegerInput(this,'${row.id}','dipdir',0,360)" onchange="commitIntegerInput('${row.id}','dipdir',this.value,0,360)"/></td>
+    <td><select class="ts" onchange="updRow('${row.id}','tipo',this.value)">${selOpts(TIPO_EST.map(t=>({code:t.code,label:t.code})),row.tipo)}</select></td> 
+    <td><input class="ti" value="${row.nstr}" type="text" inputmode="numeric" maxlength="2" style="width:34px" oninput="updateIntegerInput(this,'${row.id}','nstr',1,20)" onchange="commitIntegerInput('${row.id}','nstr',this.value,1,20)"/></td>
+    <td><input class="ti" value="${row.aber}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:100px" oninput="updateDecimalInput(this,'${row.id}','aber')" onchange="commitDecimalInput('${row.id}','aber',this.value)"/></td>
+    <td><input class="ti" value="${row.esp}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:64px" oninput="updateDecimalInput(this,'${row.id}','esp')" onchange="commitDecimalInput('${row.id}','esp',this.value)"/></td>
+    <td><input class="ti" value="${row.cont}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:76px" oninput="updateDecimalInput(this,'${row.id}','cont')" onchange="commitDecimalInput('${row.id}','cont',this.value)"/></td>
+    <td><input class="ti" value="${row.espac}" type="text" inputmode="decimal" maxlength="5" placeholder="00,00" style="width:44px" oninput="updateDecimalInput(this,'${row.id}','espac')" onchange="commitDecimalInput('${row.id}','espac',this.value)"/></td>
+    <td><select class="ts" style="width:70px" onfocus="setExtreSelectMode(this,true)" onmousedown="setExtreSelectMode(this,true)" onchange="updRow('${row.id}','next',this.value);setExtreSelectMode(this,false)" onblur="setExtreSelectMode(this,false)">${selOpts(EST_EXTRE.map(e=>({code:e.code,label:e.code})),row.next)}</select></td>
+    <td><input class="ti" value="${row.term}" type="text" inputmode="numeric" maxlength="1" style="width:44px" oninput="updateIntegerInput(this,'${row.id}','term',0,5)" onchange="commitIntegerInput('${row.id}','term',this.value,0,5)"/></td>
+    <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r1',this.value)">${selOpts(RELLENO.map(r=>r.code),row.r1)}</select></td>
     <td><select class="ts" style="width:52px" onchange="updRow('${row.id}','r2',this.value)">${selOpts(RELLENO.map(r=>({code:r.code,label:r.code})),row.r2)}</select></td>
     <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r1_89!==null?rt.r1_89:"—"}</td>
     <td style="color:#fde68a;font-size:10px;min-width:30px;">${rt.r2_89!==null?rt.r2_89:"—"}</td>
-    <td><input class="ti" value="${row.jrc}" type="number" min="0" max="20" step="0.5" style="width:38px" onchange="updRow('${row.id}','jrc',this.value)"/></td>
+    <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r1_76!==null?rt.r1_76:"—"}</td>
+    <td style="color:var(--pk);font-size:10px;min-width:30px;">${rt.r2_76!==null?rt.r2_76:"—"}</td>
+    <td><input class="ti" value="${row.jrc}" type="text" inputmode="numeric" maxlength="2" style="width:38px" oninput="updateIntegerInput(this,'${row.id}','jrc',0,20)" onchange="commitIntegerInput('${row.id}','jrc',this.value,0,20)"/></td>
     <td><select class="ts" style="width:44px" onchange="updRow('${row.id}','rug',this.value)"><option value="">—</option>${Object.keys(RUGOSIDAD).map(k=>`<option value="${k}"${row.rug===k?" selected":""}>${k}</option>`).join("")}</select></td>
     <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','forma',this.value)">${selOpts(FORMA_EST.map(f=>({code:f.code,label:f.code})),row.forma)}</select></td>
     <td><select class="ts" style="width:48px" onchange="updRow('${row.id}','alt',this.value)">${selOpts(ALTERACION.map(a=>({code:a.code,label:a.code})),row.alt)}</select></td>
@@ -498,7 +584,24 @@ function updRow(id,k,val){
   const r=rows.find(x=>x.id===id);
   if(r){r[k]=val;saveRows();renderTable();renderSummary();}
 }
+function getControlFam(){
+  const el=document.getElementById("fam-control");
+  return el&&el.value?el.value:"1";
+}
+function addRowFromControl(){addRow(getControlFam());}
+function removeLastRowFromControl(){removeLastRowByFam(getControlFam());}
 function addRow(fam){rows.push(emptyRow(fam));saveRows();renderTable();renderSummary();}
+function removeLastRowByFam(fam){
+  for(let i=rows.length-1;i>=0;i--){
+    if(rows[i].fam===fam){
+      rows.splice(i,1);
+      saveRows();
+      renderTable();
+      renderSummary();
+      return;
+    }
+  }
+}
 function delRow(id){rows=rows.filter(r=>r.id!==id);saveRows();renderTable();renderSummary();}
 function doReset(){
   if(confirm("¿Limpiar todos los datos del formulario?")){
